@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<!-- ===========================================================================
+     DIÁRIAS E ADIANTAMENTOS — Câmara Municipal de Marília
+     ===========================================================================
+     Exibe as diárias e adiantamentos concedidos a vereadores e servidores,
+     em cards, com busca, filtros (legislatura, gabinete, servidor, ano, mês),
+     exportação (CSV/Excel/JSON/XML) e impressão. Hospedada no GitHub Pages e
+     incorporada via <iframe> no site oficial (marilia.sp.leg.br).
+
+     Os dados vêm de abas por ano de uma planilha do Google Sheets, publicadas
+     como CSV (ver FONTES_POR_ANO, logo no início do <script> abaixo — é o que
+     você mexe ao abrir a aba de um ano novo). O filtro "Legislatura" decide
+     quais anos são baixados de uma vez; "Ano" e "Mês" filtram em memória.
+     Uma segunda planilha (URL_GABINETES) traz os vereadores de cada
+     legislatura, para o filtro "Gabinete".
+
+     Como adicionar um ano novo: ver COMO-ADICIONAR-UM-ANO.md no repositório.
+
+     Estilo e funções compartilhadas com as outras páginas: comum.css e
+     comum.js. Formato esperado da planilha (carimbo, cabeçalhos, tipos de
+     coluna): docs/padrao-planilhas.md.
+     =========================================================================== -->
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Relatório de Diárias e Adiantamentos</title>
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="comum.css" />
+
+    <style>
+        /* Card de somatória (desativado) — a estrutura padrão dos cards vem de comum.css */
+        .totais-container { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
+        .total-box { flex: 1 1 250px; background: white; border: 1px solid #e2e8f0; border-left: 4px solid #003b75; border-radius: 10px; padding: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .total-box label { font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; display: block; }
+        .total-box span { font-size: 18px; font-weight: 800; }
+        @media print {
+            .totais-container { display: flex !important; flex-direction: row !important; gap: 10px !important; margin-bottom: 20px !important; page-break-inside: avoid; }
+            .total-box { border: 1px solid #cbd5e1 !important; border-left: 4px solid #003b75 !important; background: #fff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="wrapper">
+
+    <header class="topo">
+        <h1>Diárias e Adiantamentos</h1>
+        <div class="logo-container">
+            <img src="../brasao_marilia.png" alt="Brasão de Marília" width="50" height="50" class="brasao">
+            <span class="texto-camara">Câmara Municipal de Marília</span>
+        </div>
+    </header>
+
+    <!-- Cabeçalho exibido só na impressão -->
+    <div id="cabecalho-impressao">
+        <img src="../brasao_marilia.png" width="63" height="70" alt="Brasão de Marília">
+        <div>
+            <h1 style="margin:0; color:#003b75;">Diárias e Adiantamentos</h1>
+            <p style="margin:0; font-weight:bold;">Câmara Municipal de Marília</p>
+        </div>
+    </div>
+
+    <div id="loader" role="status" aria-live="polite">
+        <div class="spinner"></div>
+        <span>Carregando base de dados de diárias...</span>
+    </div>
+
+    <main class="container" id="main-container" style="display: none;">
+
+        <fieldset class="painel-grupo">
+            <legend class="titulo-painel titulo-painel--com-selo">
+                Filtros de Pesquisa
+                <span id="badge-atualizacao" class="badge-atualizacao">⏳ Sincronizando...</span>
+            </legend>
+
+            <div class="painel-filtros">
+                <input type="text" id="filtroTexto" class="span-2" placeholder="Pesquisar por nome, cargo, cidade, motivação..." autocomplete="off" aria-label="Pesquisa livre">
+
+                <select id="filtroLegislatura" aria-label="Filtrar por Legislatura"></select>
+                <select id="filtroGabinete" aria-label="Filtrar por Gabinete">
+                    <option value="">Gabinete</option>
+                </select>
+                <select id="filtroServidor" aria-label="Filtrar por Servidor">
+                    <option value="">Servidor</option>
+                </select>
+                <select id="filtroAno" aria-label="Filtrar por Ano">
+                    <option value="">Ano</option>
+                </select>
+                <select id="filtroMes" aria-label="Filtrar por Mês de partida">
+                    <option value="">Mês (partida)</option>
+                    <option value="01">Janeiro</option><option value="02">Fevereiro</option><option value="03">Março</option>
+                    <option value="04">Abril</option><option value="05">Maio</option><option value="06">Junho</option>
+                    <option value="07">Julho</option><option value="08">Agosto</option><option value="09">Setembro</option>
+                    <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+                </select>
+                <button class="btn-filtro" onclick="limparFiltros()">Limpar filtros</button>
+            </div>
+        </fieldset>
+
+        <fieldset class="painel-grupo">
+            <legend class="titulo-painel">Exportação e Impressão</legend>
+            <div class="painel-exportacao">
+                <button onclick="exportarCSV()">⬇️ CSV</button>
+                <button onclick="exportarXLSX()">⬇️ Excel</button>
+                <button onclick="exportarJSON()">⬇️ JSON</button>
+                <button onclick="exportarXML()">⬇️ XML</button>
+                <button class="btn-acao" onclick="imprimirSeguro()">🖨️ Imprimir</button>
+            </div>
+        </fieldset>
+
+        <!-- Card de somatória (desativado) — remova as marcas de comentário para ativar
+        <div class="totais-container">
+            <div class="total-box"><label>Soma das Diárias Filtradas</label><span id="txt-total-diarias">R$ 0,00</span></div>
+            <div class="total-box" style="border-left-color:#0284c7;"><label>Soma dos Adiantamentos Filtrados</label><span id="txt-total-adiantamentos">R$ 0,00</span></div>
+        </div>
+        -->
+
+        <fieldset class="painel-grupo" id="painel-visualizacao" style="padding: 10px 15px;">
+            <legend class="titulo-painel">Visualização</legend>
+            <div class="dt-custom-header">
+                <div id="comprimento-tabela"></div>
+                <div id="contagem-registros" class="badge-contagem">0 registros encontrados</div>
+            </div>
+        </fieldset>
+
+        <table id="tabela" style="width:100%" role="presentation">
+            <thead><tr><th>Dados das Diárias</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </main>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+<script>window.ORIGEM_PAI = "https://www.marilia.sp.leg.br";</script>
+<script src="comum.js"></script>
+
+<script>
+    /* removerAcentos, escapeHtml, escapeXml, parseNumeroBR, formatarBRL,
+       formatarDataBR, dataParaTimestamp, buscarCSV, indexarColunas,
+       enviarAlturaIframe e o objeto Exportar vêm de comum.js. */
+
+    // ==== CONFIGURAÇÃO =====================================================
+
+    // FONTES DE DADOS — uma URL de CSV por ano da data de partida.
+    // Para adicionar um ano novo: ver COMO-ADICIONAR-UM-ANO.md no repositório.
+    const FONTES_POR_ANO = {
+        "2026": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTtMF3eG1pp1M6Pk6ZOYhabqXwdSa59V9OwpG4974bSTW-Kh0P1_hNmSODwsmTIwtKE-LCLUNvB0yFk/pub?gid=610285154&single=true&output=csv",
+        "2025": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTtMF3eG1pp1M6Pk6ZOYhabqXwdSa59V9OwpG4974bSTW-Kh0P1_hNmSODwsmTIwtKE-LCLUNvB0yFk/pub?gid=1117138374&single=true&output=csv",
+        "2024": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTtMF3eG1pp1M6Pk6ZOYhabqXwdSa59V9OwpG4974bSTW-Kh0P1_hNmSODwsmTIwtKE-LCLUNvB0yFk/pub?gid=240692215&single=true&output=csv",
+        "2023": "https://docs.google.com/spreadsheets/d/e/2PACX-1vTtMF3eG1pp1M6Pk6ZOYhabqXwdSa59V9OwpG4974bSTW-Kh0P1_hNmSODwsmTIwtKE-LCLUNvB0yFk/pub?gid=270273885&single=true&output=csv"
+    };
+
+    // Planilha de gabinetes (filtro "Gabinete"): colunas "gabinete" | "legislatura" ("20" ou "21")
+    const URL_GABINETES = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTrEs7gAdVQ9P_mMO9qKXaa80sUO8-o-KYrqTBewtKtVA6_wp-5kzAYSLjryjJtzMMzxmhdAh9bRvwk/pub?gid=1946841856&single=true&output=csv";
+
+    // Legislaturas da Câmara (mandatos de 4 anos). Ao virar a legislatura (2029), acrescentar aqui.
+    const LEGISLATURAS = [
+        { numero: "21", rotulo: "21ª legislatura (2025–2028)", inicio: 2025, fim: 2028 },
+        { numero: "20", rotulo: "20ª legislatura (2021–2024)", inicio: 2021, fim: 2024 },
+    ];
+
+    function legislaturaDoAno(ano) {
+        const a = Number(ano);
+        return LEGISLATURAS.find(L => a >= L.inicio && a <= L.fim) || null;
+    }
+
+    function legislaturasDisponiveis() {
+        const nums = new Set();
+        Object.keys(FONTES_POR_ANO).forEach(ano => {
+            const L = legislaturaDoAno(ano);
+            if (L) nums.add(L.numero);
+        });
+        return LEGISLATURAS.filter(L => nums.has(L.numero));
+    }
+
+    function anosDaLegislatura(numero) {
+        return Object.keys(FONTES_POR_ANO)
+            .filter(ano => { const L = legislaturaDoAno(ano); return L && L.numero === numero; })
+            .sort((a, b) => Number(b) - Number(a));
+    }
+
+    // ==== ESTADO GLOBAL =====================================================
+    let tabela;
+    let dadosGlobais = [];       // diárias de todos os anos da legislatura carregada
+    let listaGabinetes = [];
+    let carimboAtualizacao = "";
+
+    // ==== CARREGAMENTO E PROCESSAMENTO ======================================
+
+    // Campo interno → nome(s) da coluna na planilha, por NOME (não posição).
+    // Aceita o nome novo e o antigo, para retrocompatibilidade.
+    const COL = {
+        servidor:     ["nome_servidor", "servidor"],
+        cargo:        ["cargo"],
+        quantidade:   ["quantidade_diarias", "qtde_diarias"],
+        data_partida: ["data_partida"],
+        data_retorno: ["data_retorno"],
+        valor_diaria: ["valor_diarias"],
+        adiantamento: ["valor_adiantamento"],
+        dotacao:      ["dotacao"],
+        local:        ["local_destino"],
+        cidade:       ["cidade_destino"],
+        motivacao:    ["motivacao_viagem"],
+    };
+
+    function processarCSV(text) {
+        const linhas = Papa.parse(text).data;
+
+        let carimbo = "";
+        if (linhas.length > 0 && linhas[0][0]) {
+            const m = String(linhas[0][0]).match(/(\d{2}\/\d{2}\/\d{4})[,\s]*(\d{2}:\d{2})?/);
+            if (m) carimbo = `Dados atualizados em ${m[1]}${m[2] ? ' ' + m[2] : ''}`;
+        }
+
+        let ic = 1;
+        for (let i = 0; i < Math.min(5, linhas.length); i++) {
+            const t = removerAcentos(linhas[i].join(" ").toLowerCase());
+            if (t.includes("servidor") || t.includes("data_partida")) { ic = i; break; }
+        }
+
+        const idx = indexarColunas(linhas[ic]);
+        const posicao = {};
+        Object.keys(COL).forEach(campo => {
+            for (const nome of COL[campo]) {
+                if (nome in idx) { posicao[campo] = idx[nome]; break; }
+            }
+        });
+
+        const faltando = ["servidor", "data_partida"].filter(c => !(c in posicao));
+        if (faltando.length) {
+            throw new Error("A planilha não tem as colunas esperadas: " + faltando.map(c => COL[c][0]).join(", ") + ".");
+        }
+
+        const pegar = (colunas, campo) => {
+            const i = posicao[campo];
+            return (i != null && colunas[i] != null) ? String(colunas[i]).trim() : "";
+        };
+
+        const diarias = linhas.slice(ic + 1).map(colunas => {
+            const obj = {
+                servidor:       pegar(colunas, "servidor").toUpperCase(),
+                cargo:          pegar(colunas, "cargo"),
+                quantidade:     pegar(colunas, "quantidade"),
+                data_partida:   formatarDataBR(pegar(colunas, "data_partida")),
+                data_retorno:   formatarDataBR(pegar(colunas, "data_retorno")),
+                dotacao:        pegar(colunas, "dotacao"),
+                local_destino:  pegar(colunas, "local"),
+                cidade_destino: pegar(colunas, "cidade"),
+                motivacao:      pegar(colunas, "motivacao"),
+            };
+
+            obj.valor_diaria_num = parseNumeroBR(pegar(colunas, "valor_diaria"));
+            obj.valor_diaria_fmt = isNaN(obj.valor_diaria_num) ? "" : formatarBRL(obj.valor_diaria_num);
+
+            const adiantRaw = parseNumeroBR(pegar(colunas, "adiantamento"));
+            obj.adiantamento_num = (isNaN(adiantRaw) || adiantRaw === 0) ? 0 : adiantRaw;
+            obj.adiantamento_fmt = obj.adiantamento_num ? formatarBRL(obj.adiantamento_num) : "";
+
+            obj.peso_data = dataParaTimestamp(obj.data_partida);
+
+            const buscaUnificada = `${obj.servidor} ${obj.cargo} ${obj.cidade_destino} ${obj.local_destino} ${obj.motivacao} ${obj.dotacao}`;
+            obj.busca_indexada = removerAcentos(buscaUnificada.toLowerCase().replace(/\n/g, ' '));
+            return obj;
+        }).filter(d => d.servidor);
+
+        return { carimbo, diarias };
+    }
+
+    async function carregarDados() {
+        $('#loader').show(); $('#main-container').hide();
+        try {
+            const legs = legislaturasDisponiveis();
+            if (!legs.length) throw new Error("Nenhuma aba de ano configurada em FONTES_POR_ANO.");
+
+            let legNum = $('#filtroLegislatura').val();
+            if (!legNum || !legs.some(L => L.numero === legNum)) legNum = legs[0].numero;
+            const leg = LEGISLATURAS.find(L => L.numero === legNum);
+
+            const anos = anosDaLegislatura(legNum);
+            if (!anos.length) throw new Error("A legislatura selecionada não tem anos configurados em FONTES_POR_ANO.");
+
+            const pedidos = anos.map(a => buscarCSV(FONTES_POR_ANO[a]));
+            const buscarGab = listaGabinetes.length === 0;
+            if (buscarGab) pedidos.push(buscarCSV(URL_GABINETES));
+            const respostas = await Promise.all(pedidos);
+            const csvGabinetes = buscarGab ? respostas.pop() : null;
+
+            dadosGlobais = [];
+            const carimbos = [];
+            respostas.forEach((csv, i) => {
+                const parte = processarCSV(csv);
+                if (parte.carimbo) carimbos.push(parte.carimbo);
+                parte.diarias.forEach(d => {
+                    d.ano = (d.data_partida || "").split('/')[2] || anos[i];
+                    d.legislatura = legNum;
+                    dadosGlobais.push(d);
+                });
+            });
+            carimboAtualizacao = carimbos[0] || "Dados sincronizados";
+
+            if (csvGabinetes != null) {
+                listaGabinetes = Papa.parse(String(csvGabinetes).trim()).data
+                    .slice(1)
+                    .map(l => ({ nome: String(l[0] || "").trim(), legislatura: String(l[1] || "").trim() }))
+                    .filter(g => g.nome);
+            }
+
+            if (dadosGlobais.length === 0) {
+                throw new Error("A planilha foi lida, mas não retornou nenhuma diária.");
+            }
+
+            popularFiltrosDinamicos(leg);
+            selecionarPeriodoMaisRecente();
+            aplicarFiltros();
+
+            $('#badge-atualizacao').text(`🟢 ${carimboAtualizacao}`);
+            $('#loader').hide();
+            $('#main-container').fadeIn(400, () => enviarAlturaIframe());
+        } catch (e) {
+            console.error("Erro ao carregar as diárias: ", e);
+            $('#loader').html(`<b style="color:#b91c1c">Não foi possível carregar os dados.<br>${escapeHtml(e.message)}<br><br>Tente recarregar a página.</b>`);
+        }
+    }
+
+    // ==== FILTROS E ORDENAÇÃO ===============================================
+
+    function popularFiltrosDinamicos(leg) {
+        const gabinetesDaLeg = listaGabinetes
+            .filter(g => !leg || !g.legislatura || g.legislatura === leg.numero)
+            .map(g => g.nome);
+
+        let htmlGab = '<option value="">Gabinete</option>';
+        [...new Set(gabinetesDaLeg)].sort((a, b) => a.localeCompare(b, 'pt-BR'))
+            .forEach(g => { htmlGab += `<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`; });
+        $('#filtroGabinete').html(htmlGab);
+
+        let htmlServ = '<option value="">Servidor</option>';
+        [...new Set(dadosGlobais.map(d => d.servidor))].sort((a, b) => a.localeCompare(b, 'pt-BR'))
+            .forEach(s => { htmlServ += `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`; });
+        $('#filtroServidor').html(htmlServ);
+
+        let htmlAno = '<option value="">Ano</option>';
+        [...new Set(dadosGlobais.map(d => d.ano))].filter(Boolean).sort((a, b) => Number(b) - Number(a))
+            .forEach(a => { htmlAno += `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`; });
+        $('#filtroAno').html(htmlAno);
+    }
+
+    function selecionarPeriodoMaisRecente() {
+        if (!dadosGlobais.length) return;
+        const maisRecente = dadosGlobais.reduce((max, d) => d.peso_data > max.peso_data ? d : max, dadosGlobais[0]);
+        const p = (maisRecente.data_partida || "").split('/');
+        if (p.length === 3) {
+            $('#filtroAno').val(p[2]);
+            $('#filtroMes').val(p[1].padStart(2, '0'));
+        }
+    }
+
+    function aplicarFiltros() {
+        const txt = removerAcentos($('#filtroTexto').val().toLowerCase());
+        const gab = removerAcentos(($('#filtroGabinete').val() || "").toLowerCase());
+        const serv = $('#filtroServidor').val();
+        const ano = $('#filtroAno').val();
+        const mes = $('#filtroMes').val();
+
+        const res = dadosGlobais.filter(d => {
+            const matchTexto = !txt || d.busca_indexada.includes(txt);
+            const matchGab = !gab || d.busca_indexada.includes(gab);
+            const matchServ = !serv || d.servidor === serv;
+            const matchAno = !ano || d.ano === ano;
+            const matchMes = !mes || (!!d.data_partida && d.data_partida.split('/')[1] === mes);
+            return matchTexto && matchGab && matchServ && matchAno && matchMes;
+        });
+
+        res.sort((a, b) => b.peso_data - a.peso_data);
+        renderizar(res);
+    }
+
+    function limparFiltros() {
+        $('#filtroTexto').val('');
+        $('select').not('#filtroLegislatura').val('');
+        selecionarPeriodoMaisRecente();
+        aplicarFiltros();
+    }
+
+    // ==== TABELA DE CARDS (DataTables) ======================================
+
+    function inicializarTabela() {
+        tabela = $('#tabela').DataTable({
+            data: [],
+            pageLength: 10,
+            ordering: false, // ordenação por data de partida é feita em aplicarFiltros()
+            language: { url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json', lengthMenu: "Exibir _MENU_ resultados" },
+            dom: 'lrt<"dt-bottom-controls"ip>',
+            columns: [{
+                data: null,
+                render: function(d) {
+                    const cargo = d.cargo
+                        ? `<span style="font-size:11px; color:#64748b; font-weight:600; text-transform:uppercase;">${escapeHtml(d.cargo)}</span>`
+                        : '';
+                    const motivacao = d.motivacao ? escapeHtml(d.motivacao).replace(/\n/g, '<br>') : '-';
+
+                    return `
+                        <div class="card-info">
+                            <div class="card-header">
+                                <div class="card-header-texto">
+                                    <span class="nome-principal">${escapeHtml(d.servidor || 'Servidor não informado')}</span>
+                                    ${cargo}
+                                </div>
+                            </div>
+
+                            <div class="card-body">
+                                <div class="info-row">
+                                    <div class="info-col">
+                                        <span class="info-label">Quantidade de Diárias</span>
+                                        <span class="info-valor">${escapeHtml(d.quantidade || '-')}</span>
+                                    </div>
+                                    <div class="info-col">
+                                        <span class="info-label">Partida</span>
+                                        <span class="info-valor">${escapeHtml(d.data_partida || '-')}</span>
+                                    </div>
+                                    <div class="info-col">
+                                        <span class="info-label">Retorno</span>
+                                        <span class="info-valor">${escapeHtml(d.data_retorno || '-')}</span>
+                                    </div>
+                                </div>
+
+                                <div class="info-row">
+                                    <div class="info-col">
+                                        <span class="info-label">Valor das Diárias</span>
+                                        <span class="info-valor">${escapeHtml(d.valor_diaria_fmt || '-')}</span>
+                                    </div>
+                                    <div class="info-col">
+                                        <span class="info-label">Adiantamento</span>
+                                        <span class="info-valor">${escapeHtml(d.adiantamento_fmt || '-')}</span>
+                                    </div>
+                                    <div class="info-col">
+                                        <span class="info-label">Dotação</span>
+                                        <span class="info-valor">${escapeHtml(d.dotacao || '-')}</span>
+                                    </div>
+                                </div>
+
+                                <div class="info-row">
+                                    <div class="info-col full-width" style="background:transparent; border:0; padding:0;">
+                                        <span class="info-label">Cidade de Destino</span>
+                                        <span class="info-valor">${escapeHtml(d.cidade_destino || '-')}</span>
+                                    </div>
+                                </div>
+                                <div class="info-row">
+                                    <div class="info-col full-width" style="background:transparent; border:0; padding:0;">
+                                        <span class="info-label">Local de Destino</span>
+                                        <span class="info-valor">${escapeHtml(d.local_destino || '-')}</span>
+                                    </div>
+                                </div>
+
+                                <div class="info-row" style="margin-top: 5px;">
+                                    <div class="info-col full-width">
+                                        <span class="info-label">Motivação da Viagem</span>
+                                        <span class="info-valor" style="font-weight: 500; font-size: 12.5px;">${motivacao}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                }
+            }],
+            initComplete: function() {
+                $('.dataTables_length').appendTo('#comprimento-tabela');
+            },
+            drawCallback: function() {
+                let sD = 0, sA = 0;
+                this.api().rows().data().each(d => {
+                    if (!isNaN(d.valor_diaria_num)) sD += d.valor_diaria_num;
+                    sA += d.adiantamento_num || 0;
+                });
+                $('#txt-total-diarias').text(formatarBRL(sD));
+                $('#txt-total-adiantamentos').text(formatarBRL(sA));
+
+                const total = this.api().rows().count();
+                $('#contagem-registros').html(`<b>${total}</b> diárias encontradas`);
+                enviarAlturaIframe();
+            }
+        });
+
+        tabela.on('page.dt', function () {
+            setTimeout(function() { document.getElementById('painel-visualizacao').scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
+        });
+    }
+
+    function renderizar(dados) {
+        if (!tabela) inicializarTabela();
+        tabela.clear();
+        tabela.rows.add(dados);
+        tabela.draw();
+    }
+
+    // ==== EXPORTAÇÕES (implementação em comum.js, objeto Exportar) =========
+
+    function dadosParaExportar() {
+        return tabela.rows().data().toArray().map(d => ({
+            "Legislatura": d.legislatura ? `${d.legislatura}ª` : '',
+            "Servidor": d.servidor || '',
+            "Cargo": d.cargo || '',
+            "Quantidade de Diarias": d.quantidade || '',
+            "Data de Partida": d.data_partida || '',
+            "Data de Retorno": d.data_retorno || '',
+            "Valor das Diarias": isNaN(d.valor_diaria_num) ? '' : d.valor_diaria_num,
+            "Valor do Adiantamento": d.adiantamento_num || '',
+            "Dotacao": d.dotacao || '',
+            "Cidade de Destino": d.cidade_destino || '',
+            "Local de Destino": d.local_destino || '',
+            "Motivacao da Viagem": d.motivacao || ''
+        }));
+    }
+
+    function gerarNomeArquivoBase() {
+        let partes = ["diarias", ($('#filtroLegislatura').val() || "") + "a_legislatura"];
+
+        const ano = $('#filtroAno').val();
+        if (ano) partes.push(ano);
+
+        const serv = $('#filtroServidor').val();
+        const gab = $('#filtroGabinete').val();
+        if (serv) partes.push(serv.replace(/\s+/g, '_'));
+        else if (gab) partes.push(gab.replace(/\s+/g, '_'));
+
+        const mes = $('#filtroMes').val();
+        partes.push(mes ? $('#filtroMes option:selected').text() : "todos_os_meses");
+
+        return removerAcentos(partes.join('_')).replace(/[^a-zA-Z0-9_]/g, '').toLowerCase();
+    }
+
+    function exportarCSV()  { Exportar.csv(dadosParaExportar(), gerarNomeArquivoBase()); }
+    function exportarXLSX() { Exportar.xlsx(dadosParaExportar(), gerarNomeArquivoBase(), "Diarias"); }
+    function exportarJSON() { Exportar.json(dadosParaExportar(), gerarNomeArquivoBase()); }
+    function exportarXML()  { Exportar.xml(dadosParaExportar(), gerarNomeArquivoBase(), { raiz: "diarias", item: "diaria" }); }
+
+    // ==== IMPRESSÃO ==========================================================
+
+    // Expande a paginação para imprimir tudo, espera o redraw terminar, imprime
+    // e restaura a paginação anterior.
+    function imprimirSeguro() {
+        if (!tabela) return;
+        const len = tabela.page.len();
+        tabela.one('draw.dt', function() {
+            setTimeout(() => {
+                window.print();
+                tabela.page.len(len).draw('page');
+            }, 100);
+        });
+        tabela.page.len(-1).draw('page');
+    }
+
+    // ==== INICIALIZAÇÃO ======================================================
+
+    $(document).ready(function() {
+        const legs = legislaturasDisponiveis();
+        $('#filtroLegislatura')
+            .html(legs.map(L => `<option value="${L.numero}">${escapeHtml(L.rotulo)}</option>`).join(''))
+            .val(legs.length ? legs[0].numero : '')
+            .on('change', carregarDados);
+
+        let debounceBusca;
+        $('#filtroTexto').on('input', function() {
+            clearTimeout(debounceBusca);
+            debounceBusca = setTimeout(aplicarFiltros, 250);
+        });
+
+        $('select').not('#filtroLegislatura').on('change', aplicarFiltros);
+
+        carregarDados();
+    });
+</script>
+</body>
+</html>

@@ -1,3 +1,5 @@
+<img src="brasao_marilia.png" alt="Brasão de Marília" width="70">
+
 # Tabelas de Transparência — Câmara Municipal de Marília
 
 Páginas HTML com dados de transparência da Câmara Municipal de Marília
@@ -19,16 +21,16 @@ ver seção [Repositório de scripts](#repositório-de-scripts)).
 
 ```
 tabelas_transparencia/
-├── paginas/          páginas completas, hospedadas no GitHub Pages
-│   ├── comum.css          estilo compartilhado por todas as páginas
-│   ├── comum.js           funções compartilhadas (datas, exportação, iframe, etc.)
-│   ├── brasao_marilia.png imagem do brasão, usada pelas páginas
+├── brasao_marilia.png    imagem do brasão, usada pelo README e pelas páginas
+├── paginas/              páginas completas, hospedadas no GitHub Pages
+│   ├── comum.css              estilo compartilhado por todas as páginas
+│   ├── comum.js               funções compartilhadas (datas, exportação, iframe, etc.)
 │   ├── contratos.html
 │   ├── diarias.html
 │   ├── empresas_sancionadas.html
 │   └── julgamentos_contas_camara.html
 │
-└── incorporacao/     fragmentos de HTML para colar no editor do site oficial
+└── incorporacao/         fragmentos de HTML para colar no editor do site oficial
     ├── contratos.html
     ├── diarias.html
     ├── empresas_sancionadas.html
@@ -76,6 +78,9 @@ Google Sheets (planilha)
 Quando a estrutura de uma planilha muda (nome de aba, cabeçalho, nova aba
 de ano), a página em `paginas/` pode quebrar na hora — o formato esperado
 de cada planilha está documentado no topo de cada arquivo `.html`.
+
+Para publicar a aba de um ano novo (contratos, diárias, ...), ver
+[COMO-ADICIONAR-UM-ANO.md](COMO-ADICIONAR-UM-ANO.md).
 
 ---
 
