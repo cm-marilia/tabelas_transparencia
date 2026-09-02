@@ -4,7 +4,7 @@ Documento de referência para quem mantém as planilhas do Google Sheets que
 alimentam as Tabelas de Transparência. Mantê-lo atualizado a cada mudança de
 estrutura.
 
-- **Última revisão:** 31/08/2026
+- **Última revisão:** 02/09/2026
 - **Aplica-se a:** contratos, servidores, diárias, remuneração detalhada,
   estagiários, empresas sancionadas, painel orçamentário, painel de
   manifestações, julgamentos de contas.
@@ -101,93 +101,44 @@ em aba única — indicado na seção 6.
 
 ---
 
-## 4. Passo a passo — criar a aba de um ano novo
+## 4. Publicar a aba de um ano novo
 
-Com o Apps Script instalado, use o menu:
+Fluxo único, do começo ao fim. "Publicar na web" é **independente** do botão
+*Compartilhar* — a planilha pode continuar **Restrita** (ninguém acessa o
+arquivo em si); só o CSV da aba publicada fica público.
 
-1. **Transparência → Criar aba do próximo ano.** Isso clona a estrutura da
-   aba mais recente, limpa os dados, põe a nova aba na frente e grava o
-   carimbo em A1.
-2. Conferir os cabeçalhos na linha 2 (vêm da cópia).
-3. Lançar os dados a partir da linha 3.
-4. **Publicar a aba:** `Arquivo → Compartilhar → Publicar na web` → selecionar
-   a aba do ano novo → *Publicar*.
-5. Copiar a URL publicada (contém `&gid=`).
-6. Enviar a URL para quem mantém o código **ou**, se você mesmo for editar,
-   adicionar a entrada no objeto de URLs no topo do arquivo HTML da página
-   (seção 6 indica qual arquivo e a variável) e commitar.
-7. Conferir a página no ar: o seletor de ano mostra o ano novo e a tabela
-   carrega.
-
-> Sem o passo 4–6 a página **não enxerga** o ano novo — ela só conhece as URLs
-> que estão no código.
-
-### Criar a aba manualmente (se não usar o menu)
-
-1. Nova aba, nome = ano com 4 dígitos.
-2. A1 fica em branco (o Apps Script carimba sozinho em segundos; ou use
-   *Transparência → Carimbar agora*).
-3. Linha 2 = copiar os cabeçalhos de outra aba, sem alterar nada.
-4. Arrastar a aba para a primeira posição.
-5. Seguir do passo 4 acima (publicar).
-
----
-
-## 4b. Publicar as abas (compartilhamento) — passo a passo
-
-O site lê cada aba por uma URL de **CSV publicado**. "Publicar na web" é
-**independente** do botão *Compartilhar* — a planilha pode continuar
-**Restrita** (ninguém acessa o arquivo em si); só o CSV daquela aba fica
-público.
-
-### Publicar uma aba
-
-1. `Arquivo → Compartilhar → Publicar na web`.
-2. Aba **Link**. No 1º seletor, **troque de "Documento inteiro" para a aba
-   específica** (ex.: `2026`). ⚠️ Não deixe "Documento inteiro" — isso
-   expõe todas as abas, inclusive rascunhos.
-3. No 2º seletor, escolha **Valores separados por vírgula (.csv)**.
-4. Clique **Publicar** e confirme.
-5. Marque **"Republicar automaticamente quando alterações forem feitas"**
-   (fica ligado por padrão) — sem isso o CSV congela na versão publicada.
-6. Copie a URL. Ela tem o formato:
+1. **Criar a aba** — menu **Transparência → Criar aba do próximo ano** (com
+   o Apps Script instalado). Clona a estrutura da aba mais recente, limpa os
+   dados, põe a aba nova na frente e já grava o carimbo em A1. Conferir só
+   os cabeçalhos da linha 2 (vêm da cópia) e lançar os dados a partir da
+   linha 3.
+2. **Publicar a aba** — `Arquivo → Compartilhar → Publicar na web` → aba
+   **Link** → no 1º seletor, trocar "Documento inteiro" pela aba do ano
+   novo (⚠️ nunca deixar em "Documento inteiro" — expõe todas as abas,
+   inclusive rascunhos) → no 2º seletor, **Valores separados por vírgula
+   (.csv)** → **Publicar** → marcar **"Republicar automaticamente quando
+   alterações forem feitas"** (sem isso o CSV congela na versão publicada).
+3. **Copiar a URL publicada** (formato
    `https://docs.google.com/spreadsheets/d/e/2PACX-.../pub?gid=NÚMERO&single=true&output=csv`
-   O `gid=NÚMERO` identifica a aba.
+   — o `gid` identifica a aba) e colar no objeto `FONTES_POR_ANO`, no topo
+   do `<script>` da página correspondente (seção 6 indica o arquivo).
+   Commitar.
+4. **Conferir a página no ar** — o seletor de ano mostra o ano novo e a
+   tabela carrega.
 
-### Repetir para cada aba de ano
+> Sem os passos 2–3 a página **não enxerga** o ano novo — ela só conhece as
+> URLs que estão no código. Passo a passo com capturas de tela:
+> `COMO-ADICIONAR-UM-ANO.md`, no repositório `tabelas_transparencia`.
 
-Faça o passo acima para `2026`, `2025`, `2024`, `2023`. Você terá 4 URLs,
-uma por ano.
+**Sem o Apps Script instalado**, criar a aba na mão: nome = ano com 4
+dígitos, A1 em branco (carimbar depois por *Transparência → Carimbar
+agora*), linha 2 = cabeçalhos copiados de outra aba sem alterar nada,
+arrastar para a primeira posição — depois seguir do passo 2 acima.
 
-### Colar as URLs no código
-
-No topo do `<script>` de `contratos.html`, no objeto `FONTES_POR_ANO`:
-
-```js
-const FONTES_POR_ANO = {
-    "2026": "https://docs.google.com/spreadsheets/d/e/2PACX-.../pub?gid=0&single=true&output=csv",
-    "2025": "https://docs.google.com/spreadsheets/d/e/2PACX-.../pub?gid=843211&single=true&output=csv",
-    "2024": "https://docs.google.com/spreadsheets/d/e/2PACX-.../pub?gid=157882&single=true&output=csv",
-    "2023": "https://docs.google.com/spreadsheets/d/e/2PACX-.../pub?gid=992013&single=true&output=csv",
-};
-```
-
-Commit → a página passa a mostrar o seletor de ano e a ler as abas.
-
-### Despublicar (se precisar tirar uma aba do ar)
-
-Mesma tela → **Conteúdo publicado e configurações → Parar de publicar**.
-A página que aponta para aquela URL passa a mostrar erro de carregamento
-(tela vermelha) — remova também a entrada de `FONTES_POR_ANO`.
-
-### Checklist de segurança ao publicar
-
-- [ ] Publiquei **a aba**, não "Documento inteiro".
-- [ ] Nenhuma aba de rascunho / trabalho está publicada
-      (*Publicar na web → Conteúdo publicado* lista o que está no ar).
-- [ ] CPFs já estão mascarados na planilha (rodei *Mascarar CPFs agora* se
-      importei dados).
-- [ ] Só colunas públicas na aba publicada.
+**Despublicar uma aba** (se precisar tirar do ar): mesma tela → **Conteúdo
+publicado e configurações → Parar de publicar**. A página que aponta pra
+aquela URL passa a mostrar erro de carregamento — remover também a entrada
+de `FONTES_POR_ANO`.
 
 ---
 
@@ -212,20 +163,10 @@ reforço por planilha e passo a passo de instalação: repositório privado
 
 ## 6. Dicionário de colunas por planilha
 
-> Preencher `gid` conforme cada aba for publicada. `[texto]`, `[data]`,
-> `[número]`, `[url]` indicam o tipo esperado (seção 2.4).
->
-> **Vocabulário:** minúsculo, `snake_case`, por extenso, sem contração.
-> Só a planilha **contratos** já está com o vocabulário final; as demais
-> abaixo mostram `hoje → proposto` e serão renomeadas no diagnóstico de cada
-> uma.
+> `[texto]`, `[data]`, `[número]`, `[url]` indicam o tipo esperado (seção
+> 2.4). Cabeçalhos em `snake_case`, minúsculo, por extenso, sem contração.
 
-### contratos  — dividir por: **ano do `numero_contrato`**  ✅ vocabulário final
-Arquivo HTML: `contratos.html` — **migrado** (lê colunas por nome, valor como
-número, `situacao_contrato`, seletor de ano). As 4 abas já estão publicadas e
-no `FONTES_POR_ANO` (gid: 2026 `47019203` · 2025 `1922578156` · 2024
-`789937754` · 2023 `1300317421`). Ao abrir um ano novo, acrescentar a linha
-`"ANO": "URL"` nesse objeto.
+### contratos — dividir por: ano do `numero_contrato`
 
 | Coluna | Tipo | Observação |
 |---|---|---|
@@ -233,136 +174,168 @@ no `FONTES_POR_ANO` (gid: 2026 `47019203` · 2025 `1922578156` · 2024
 | `cpf_ou_cnpj` | texto | |
 | `razao_social` | texto | |
 | `objeto_contrato` | texto | |
-| `data_assinatura` | data | `dd/mm/aaaa` |
+| `data_assinatura` | data | |
 | `valor_contrato` | número | sem `R$` |
-| `data_fim_vigencia` | data **ou** texto | data `dd/mm/aaaa`; ou `INDETERMINADA`. Se `situacao_contrato = Rescindido`, esta é a data da rescisão. |
-| `situacao_contrato` | texto | **vazio** = curso normal (a página calcula "Vigente / Encerrado" pela data). `Rescindido` = encerrado antecipadamente por descumprimento. Fato permanente — não se apaga quando a sanção vence. Sem coluna de motivo (decisão): o motivo fica em `empresas_sancionadas.motivo_sancao` e no PDF via `link_processo_sapl`. |
+| `data_fim_vigencia` | data **ou** texto | data `dd/mm/aaaa`, ou `INDETERMINADA`. Se `situacao_contrato = Rescindido`, esta é a data da rescisão (não a vigência original). |
+| `situacao_contrato` | texto | **vazio** = curso normal (a página calcula "Vigente"/"Encerrado" pela data). `Rescindido` = encerrado antecipadamente por descumprimento — fato **permanente**, não se apaga quando a sanção correspondente vence. Sem coluna de motivo: o motivo fica em `empresas_sancionadas.motivo_sancao` e no PDF via `link_processo_sapl`. |
 | `modalidade_licitacao` | texto | |
 | `fiscal_contrato` | texto | |
 | `link_pdf_contrato` | url | |
 | `link_processo_sapl` | url | |
 
-Abas / gid: 2026 `gid=____` · 2025 `gid=____` · 2024 `gid=____` · 2023 `gid=____`
+**Regra para preencher `data_fim_vigencia` de um contrato rescindido:** se a
+Portaria de penalidade cita a data real da rescisão, usar essa data; se não
+cita nenhuma, usar a data da própria Portaria. Precedentes:
 
-#### Contratos rescindidos (situacao_contrato = Rescindido)
-
-| nº | `data_fim_vigencia` gravada | Portaria de penalidade | Fim da sanção (na `empresas_sancionadas`) |
-|---|---|---|---|
-| 55/2023 Petromar | 21/03/2024 (data da Portaria — rescisão sem data no doc) | 11/2024 | impedimento 3 anos → 21/03/2027 |
-| 57/2023 Web Mídias | 17/04/2024 (rescisão real) | 15/2024 | impedimento **2 anos** → 17/06/2026 |
-| 25/2024 Lucas Toniate | 30/07/2024 (rescisão real) | 23/2024 | impedimento 2 anos → 30/09/2026 |
-| 6/2025 Soretto | 06/06/2025 (data da Portaria — rescisão sem data no doc) | 7/2025 | impedimento 3 anos → 06/06/2028 |
-| 51/2024 Flex Services | *(vazio)* — marca removida | — | **pendência:** não consta na `empresas_sancionadas`; confirmar se houve sanção |
+| nº | `data_fim_vigencia` gravada | Portaria |
+|---|---|---|
+| 55/2023 Petromar | 21/03/2024 (data da Portaria) | 11/2024 |
+| 57/2023 Web Mídias | 17/04/2024 (rescisão real) | 15/2024 |
+| 25/2024 Lucas Toniate | 30/07/2024 (rescisão real) | 23/2024 |
+| 6/2025 Soretto | 06/06/2025 (data da Portaria) | 7/2025 |
+| 51/2024 Flex Services | 31/08/2026 (data da Portaria) | 18/2026 |
 
 > 3 contratos com `data_fim_vigencia = INDETERMINADA` (32/2023, 33/2023,
 > 40/2023 — energia CPFL e Correios) são legítimos, ficam como estão.
 
-**Pendências de conteúdo em `contratos` (corrigir na planilha):**
-- 6 CPFs de pessoa física estavam **crus** na planilha antiga → a versão
-  normalizada já os gravou mascarados (`***.xxx.xxx-**`).
-- 4 CNPJs com erro de digitação: aba 2026 linhas 14 (`06.7871909/0001-18`)
-  e 15 (`35.093.155/0001-0`); aba 2025 linhas 62 (`015.655.026/0001-45`)
-  e 70 (`67.564.773/001-71`).
+### diárias — dividir por: ano da `data_partida`
 
-> As correções que as Portarias revelaram na planilha `empresas_sancionadas`
-> (datas de fim de sanção da Web Mídias e Soretto, linha faltante da Flex)
-> estão detalhadas na seção 6, em **empresas_sancionadas** — já aplicadas na
-> versão normalizada dessa planilha.
-
-### diárias — dividir por: **ano da `data_partida`** ✅ diagnóstico 01/09/2026
-878 registros 2023–2026. Aba `Página1` → abas de ano. Valores já numéricos na
-origem. Sem coluna de CPF. Normalizada em `planilhas_normalizadas/diarias.xlsx`.
-
-| Coluna (antigo → padrão) | Tipo | Observação |
+| Coluna | Tipo | Observação |
 |---|---|---|
-| `servidor` → `nome_servidor` | texto | |
+| `nome_servidor` | texto | |
 | `cargo` | texto | traz "Ver. Fulano" — usado pelo filtro de gabinete |
-| `qtde_diarias` → `quantidade_diarias` | texto | ex. `2 DIÁRIAS E 2/3 DE DIÁRIA` |
-| `data_partida` | data | ano dela = aba |
+| `quantidade_diarias` | texto | ex. `2 DIÁRIAS E 2/3 DE DIÁRIA` |
+| `data_partida` | data | ano dela define a aba |
 | `data_retorno` | data | |
 | `valor_diarias` | número | sem `R$` |
-| `valor_adiantamento` | número | **`0` gravado como célula vazia** (regra 2.4) |
-| `dotacao` | texto | **nome mantido** (decisão do usuário). Só `Corpo Administrativo` / `Corpo Legislativo` |
+| `valor_adiantamento` | número | `0` gravado como célula vazia (regra 2.4) |
+| `dotacao` | texto | só `Corpo Administrativo` ou `Corpo Legislativo` |
 | `local_destino` | texto | |
 | `cidade_destino` | texto | |
 | `motivacao_viagem` | texto longo | |
 
-> Linhas da mesma viagem repetidas com `dotacao` diferente = **rateio real**, não
-> dupla contagem (decisão do usuário — manter).
+> Linhas da mesma viagem repetidas com `dotacao` diferente são **rateio
+> real**, não dupla contagem — manter as duas.
 
-HTML: `diarias.html` — **a migrar**: comum.css/comum.js, `FONTES_POR_ANO` +
-URL de gabinetes, selo `DADOS_ATUALIZADOS_EM`, colunas por nome com aliases dos
-nomes antigos, `formatarBRL`, guard B2.
+Planilha auxiliar `gabinetes` — 2 colunas: `gabinete` [texto] |
+`legislatura` [texto, `"20"` ou `"21"`]. Alimenta o filtro "Gabinete" da
+página (só mostra os vereadores da legislatura carregada).
 
-`diarias.html` — filtro **Legislatura** é o seletor principal: carrega de uma vez
-todas as abas de ano daquela legislatura (`LEGISLATURAS` no HTML: 21ª = 2025–2028,
-20ª = 2021–2024). Depois "Ano" e "Mês" filtram em memória.
+Prompt pronto para lançar novos pareceres de diárias (PDF → linhas):
+`prompt-lancar-diarias.txt`, na raiz do repositório `tabelas_transparencia`.
 
-Planilha auxiliar `gabinetes` (`planilhas_normalizadas/gabinetes.xlsx`):
-**2 colunas** — `gabinete` | `legislatura` (`20` ou `21`, texto). O filtro
-"Gabinete" só mostra os vereadores da legislatura carregada.
-21ª = os 17 atuais. 20ª = 18 nomes **RASCUNHO** (reconstruídos das diárias 2023–24 +
-reeleitos de 2024) — usuário vai confirmar a lista oficial.
+### empresas_sancionadas — aba única (não divide por ano)
 
-Para lançar novos pareceres de diárias (PDF → linhas), usar o prompt pronto em
-`prompt-lancar-diarias.txt` (na raiz do repositório).
+A página só mostra sanções **vigentes** por padrão (compara
+`data_fim_sancao` com hoje); isso exige todas as linhas juntas — dividir por
+ano quebraria a lógica.
 
-### empresas_sancionadas — **aba única** (não divide por ano)
-A página só mostra sanções **vigentes** (compara `data_fim_sancao` com hoje);
-isso exige todas as linhas juntas — dividir por ano quebraria a lógica.
-HTML: `empresas_sancionadas.html` — **migrado** (comum.css/comum.js, colunas
-por nome, `buscarCSV` com timeout, guard B2). Filtro **Situação**: "vigentes"
-(padrão) / "encerradas" / "todas" — calculado de `data_fim_sancao` vs hoje,
-nada apagado. Selo verde "Sanção encerrada em…" para as vencidas.
-
-| Coluna (hoje → padrão) | Tipo | Observação |
+| Coluna | Tipo | Observação |
 |---|---|---|
-| `cnpj` → `cpf_ou_cnpj` | texto | CNPJ completo; CPF (11 díg) mascarado pelo `carimbo.gs` |
+| `cpf_ou_cnpj` | texto | CNPJ completo; CPF (11 díg.) mascarado pelo Apps Script |
 | `razao_social` | texto | |
 | `numero_contrato` | texto | padrão `M/AAAA` ou `NN/AAAA` |
-| `objeto_contrato` | texto | |
-| `motivo_sancao` | texto | |
-| `fim_sancao` → `data_fim_sancao` | data | vazio = sanção sem prazo (sempre exibida) |
-| `observacao` | texto longo | narrativa da Portaria |
+| `objeto_contrato` | texto | resumido (ex.: `Aquisição de café em grãos`) |
+| `motivo_sancao` | texto | `Inexecução contratual` em todas as linhas até hoje |
+| `data_fim_sancao` | data | vazio = sanção sem prazo (sempre exibida) |
+| `observacao` | texto longo | narrativa da Portaria — fórmula fixa, ver `prompt-lancar-apenados.txt` na raiz do repositório `tabelas_transparencia` |
 
-**Correções aplicadas na versão normalizada** (base: Portarias de Ordem):
-- **57/2023 Web Mídias** — `data_fim_sancao` 17/06/2027 → **17/06/2026**
-  (Portaria 15/2024: impedimento de 2 anos, não 3); observação: "3 (três)
-  anos" → "2 (dois) anos". ⚠️ Com a correção a sanção já venceu (2 anos desde
-  17/06/2024) → **sai da listagem** (vai para histórico). Correto.
-- **6/2025 Soretto** — `data_fim_sancao` 17/06/2027 → **06/06/2028**
-  (Portaria 7/2025, publicada 06/06/2025, 3 anos); observação: multa "15%
-  (quinze por cento)" → "30% (trinta por cento)", "a contar de 17/06/2024" →
-  "a contar de 06/06/2025".
-- **55/2023 Petromar** e **25/2024 Lucas Toniate** — sem alteração.
-- **Pendência: 51/2024 Flex Services** — marcado "apenado" em `contratos`
-  mas sem linha aqui. Confirmar se houve sanção; se sim, adicionar a linha
-  com base na Portaria.
+### estagiarios — dividir por: *(a definir — ver pendências)*
 
-### estagiarios — dividir por: *(a definir — cadastro atravessa anos)*
-`nome_estagiario` [texto] · `data_admissao` [data] · `data_desligamento` [data, pode ser vazio]
+| Coluna | Tipo |
+|---|---|
+| `nome_estagiario` | texto |
+| `data_admissao` | data |
+| `data_desligamento` | data, pode ser vazio |
 
-### julgamentos_contas_camara — dividir por: **`exercicio`**
-`exercicio` [texto] · `processo` → `numero_processo` [texto] · `julgamento` → `resultado_julgamento` [texto] · `transito_julgado` → `data_transito_julgado` [data] · `itens_irregulares` [texto, pode ser vazio]
+### julgamentos_contas_camara — dividir por: `exercicio`
 
-### painel_manifestacoes — dividir por: **ano da `data_abertura`**
-`tipo` → `tipo_manifestacao` [texto] · `assuntos` → `assunto` [texto] · `canal_entrada` [texto] · `data_abertura` [data] · `municipio` [texto] · `data_conclusao` [data, pode ser vazio]
+| Coluna | Tipo |
+|---|---|
+| `exercicio` | texto |
+| `numero_processo` | texto |
+| `resultado_julgamento` | texto |
+| `data_transito_julgado` | data |
+| `itens_irregulares` | texto, pode ser vazio |
 
-### painel_orcamentario — dividir por: **`ano`**
-`ano` [texto] · `mes` [texto, `JAN`..`DEZ`] · `duodecimo_previsto` [número] · `duodecimo` → `duodecimo_repassado` [número] · `empenhado` → `valor_empenhado` [número] · `liquidado` → `valor_liquidado` [número] · `pago` → `valor_pago` [número] · `resultado` [número]
+### painel_manifestacoes — dividir por: ano da `data_abertura`
 
-### remuneracao_detalhada_servidores — dividir por: **`ano`**
-Renomear a aba `planilha` → padrão de ano. Cabeçalhos hoje com maiúscula/acento/espaço → renomear todos:
-`Ano`→`ano` · `Mês`→`mes` · `Matricula`→`matricula` · `Nome`→`nome_servidor` · `Vencimentos Brutos`→`vencimentos_brutos` · `Referência`→`referencia` · `Vantagens Pessoais`→`vantagens_pessoais` · `Outras Verbas Remuneratórias Legais ou Judiciais`→`outras_verbas_remuneratorias_legais_judiciais` · `Verbas Indenizatórias e/ou Eventuais`→`verbas_indenizatorias_eventuais` · `Auxílio Saúde / Alimentação`→`auxilio_saude_alimentacao` · `Abono de Permanência`→`abono_permanencia` · `Redutor`→`redutor`
-Verbas todas em **número** (hoje texto `R$ ...`). A planilha tem 16 colunas — as 4 restantes (13–16) a levantar no diagnóstico.
+| Coluna | Tipo |
+|---|---|
+| `tipo_manifestacao` | texto |
+| `assunto` | texto |
+| `canal_entrada` | texto |
+| `data_abertura` | data |
+| `municipio` | texto |
+| `data_conclusao` | data, pode ser vazio |
 
-### servidores — **aba única** (retrato do quadro atual, não divide por ano)
-`nome_func` → `nome_funcionario` [texto] · `cargo` [texto] · `lotacao` [texto] · `data_admissao` [data] · `data_demissao` [data, vazio = ativo] · `jornada` [texto]
-Remover a 7ª coluna vazia (sem cabeçalho).
+### painel_orcamentario — dividir por: `ano`
+
+| Coluna | Tipo |
+|---|---|
+| `ano` | texto |
+| `mes` | texto, `JAN`..`DEZ` |
+| `duodecimo_previsto` | número |
+| `duodecimo_repassado` | número |
+| `valor_empenhado` | número |
+| `valor_liquidado` | número |
+| `valor_pago` | número |
+| `resultado` | número |
+
+### remuneracao_detalhada_servidores — dividir por: `ano`
+
+| Coluna | Tipo |
+|---|---|
+| `ano` | texto |
+| `mes` | texto |
+| `matricula` | texto |
+| `nome_servidor` | texto |
+| `vencimentos_brutos` | número |
+| `referencia` | texto |
+| `vantagens_pessoais` | número |
+| `outras_verbas_remuneratorias_legais_judiciais` | número |
+| `verbas_indenizatorias_eventuais` | número |
+| `auxilio_saude_alimentacao` | número |
+| `abono_permanencia` | número |
+| `redutor` | número |
+
+> Planilha de origem tem 16 colunas — as 4 restantes (13–16) ainda não
+> mapeadas, ver pendências.
+
+### servidores — aba única (retrato do quadro atual)
+
+| Coluna | Tipo |
+|---|---|
+| `nome_funcionario` | texto |
+| `cargo` | texto |
+| `lotacao` | texto |
+| `data_admissao` | data |
+| `data_demissao` | data, vazio = ativo |
+| `jornada` | texto |
 
 ---
 
-## 7. Checklist ao mexer numa planilha
+## 7. Pendências e diagnóstico
+
+Itens ainda em aberto, por planilha — mover para o histórico (ou apagar)
+assim que resolvidos.
+
+- **contratos** — 4 CNPJs com erro de digitação: aba 2026 linhas 14
+  (`06.7871909/0001-18`) e 15 (`35.093.155/0001-0`); aba 2025 linhas 62
+  (`015.655.026/0001-45`) e 70 (`67.564.773/001-71`).
+- **diárias** — gabinetes da 20ª legislatura (18 nomes) são um rascunho
+  reconstruído a partir das diárias 2023–24 e dos reeleitos de 2024; falta
+  confirmar a lista oficial.
+- **estagiarios** — critério de divisão por aba ainda não definido (o
+  cadastro atravessa anos, diferente das demais planilhas de acervo).
+- **remuneracao_detalhada_servidores** — 4 colunas da planilha de origem
+  (13–16) ainda não mapeadas para o dicionário da seção 6.
+- **servidores** — a planilha de origem tem uma 7ª coluna vazia, sem
+  cabeçalho, a remover.
+
+---
+
+## 8. Checklist ao mexer numa planilha
 
 - [ ] Linha 1 = só o carimbo em A1; linha 2 = cabeçalhos; dados a partir da 3.
 - [ ] Cabeçalhos em `snake_case`, sem acento — se renomeou algum, avisou o código e atualizou a seção 6.
@@ -371,5 +344,7 @@ Remover a 7ª coluna vazia (sem cabeçalho).
 - [ ] Valores monetários como número, sem `R$`.
 - [ ] **CPFs mascarados** na planilha (`***.456.789-**`); CNPJ completo.
 - [ ] Campos "sem informação" = célula vazia.
-- [ ] Publiquei **a aba**, não "Documento inteiro"; nenhum rascunho no ar.
+- [ ] Publiquei **a aba**, não "Documento inteiro"; nenhum rascunho no ar
+      (*Publicar na web → Conteúdo publicado* lista o que está no ar).
+- [ ] Só colunas públicas na aba publicada — nenhuma coluna interna/rascunho exposta.
 - [ ] Aba nova de ano: publicada, `gid` anotado, URL adicionada ao HTML, página no ar conferida.

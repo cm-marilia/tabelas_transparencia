@@ -1,0 +1,93 @@
+PROMPT — LANÇAR NOVAS PORTARIAS DE PENALIDADE (EMPRESAS SANCIONADAS)
+Portal de Transparência da Câmara Municipal de Marília
+
+Como usar: anexe o(s) PDF(s) da "Portaria de Ordem" de aplicação de penalidade
+e cole o texto abaixo.
+
+------------------------------------------------------------------------------
+
+Anexei N PDFs de "Portaria de Ordem" de aplicação de penalidade a licitante/
+contratado da Câmara de Marília. Extraia para linhas no formato de
+planilhas/normalizadas/empresas_sancionadas.xlsx (aba única). UMA linha por
+Portaria (uma empresa/CNPJ cada).
+IMPORTANTE: não invente formatação nova — copie o padrão exato das linhas que
+já existem na planilha (principalmente o campo "observacao", que segue uma
+fórmula fixa — ver abaixo).
+
+Mapa das colunas:
+- cpf_ou_cnpj      = CNPJ da empresa (ou CPF, se pessoa física — 11 dígitos),
+                     com pontuação: "12.345.678/0001-90". CPF cru NUNCA fica na
+                     planilha — se aparecer, mascare já ao lançar
+                     ("***.456.789-**"), igual à coluna cpf_ou_cnpj de contratos.
+- razao_social     = nome da empresa/pessoa como consta no "Diante do exposto"
+                     ou no cabeçalho da Portaria, maiúsculo, sem o ponto final.
+- numero_contrato  = número do contrato descumprido, padrão "NN/AAAA".
+                     ⚠️ Confira TODAS as ocorrências do número no PDF — é comum
+                     haver um número digitado errado uma única vez (erro do
+                     próprio documento); use o que se repete na maioria das
+                     vezes e sinalize a divergência como pendência.
+- objeto_contrato  = objeto do contrato, RESUMIDO em poucas palavras (não copiar
+                     a frase inteira do PDF). Padrão das linhas existentes:
+                     "Aquisição de <o quê>" ou "Prestação de serviços de <o quê>"
+                     (ex.: "Aquisição de café em grãos", "Manutenção preventiva
+                     e corretiva de elevador").
+- motivo_sancao    = "Inexecução contratual" — é o valor usado em TODAS as
+                     linhas existentes; mantenha, a menos que a Portaria deixe
+                     claro tratar-se de outro motivo (ex.: fraude, conluio) —
+                     nesse caso, use um resumo curto equivalente e avise.
+- data_fim_sancao  = data de início da sanção de impedimento + prazo aplicado
+                     (art. 156, III, Lei 14.133/2021), como DATA (dd/mm/aaaa),
+                     não texto. Achar no PDF:
+                       1. o PRAZO em anos ("pelo período de N (...) anos");
+                       2. a partir de QUANDO ("a contar de dd/mm/aaaa" — se
+                          não houver essa frase explícita, usar a data de
+                          publicação/vigência da Portaria, no fim do documento).
+                     Somar os dois. Ex.: prazo 3 anos a contar de 31/08/2026 ->
+                     31/08/2029.
+- observacao       = fórmula FIXA (preencher as lacunas {}, sem mudar o texto):
+
+                     "Foi realizada a rescisão contratual, nos termos do art.
+                     137, inciso I, da Lei Federal nº 14.133/2021, bem como
+                     instaurado o Processo Administrativo Punitivo nº {N/AAAA},
+                     o qual sugeriu a aplicação das sanções previstas nos
+                     incisos II e III do art. 156 da referida lei. A penalidade
+                     de multa, prevista no inciso II, foi fixada na forma do §
+                     3º do mesmo dispositivo legal, no percentual de {P}%
+                     ({P por extenso} por cento) sobre o valor do contrato
+                     descumprido, correspondente a R$ {valor} ({valor por
+                     extenso}). Além disso, foi aplicada a sanção de
+                     impedimento de licitar e contratar, prevista no inciso
+                     III do art. 156 da Lei Federal nº 14.133/2021, nos termos
+                     do § 4º do referido artigo, pelo prazo de {T} ({T por
+                     extenso}) anos, a contar de {data}."
+
+                     - {N/AAAA} = número do Processo Administrativo Punitivo
+                       (não confundir com o número da própria Portaria).
+                     - {P} e {valor} = percentual e valor da multa (inciso II).
+                     - {T} e {data} = prazo e início do impedimento (inciso III).
+                     - Se a Portaria não citar "art. 137, inciso I" para a
+                       rescisão (algumas não citam o artigo, só narram a
+                       extinção/rescisão do contrato), MANTENHA essa parte da
+                       fórmula igual assim mesmo — é o artigo padrão usado
+                       nesta planilha para rescisão por descumprimento do
+                       contratado — mas avise que o PDF não confirmou o
+                       artigo explicitamente.
+                     - Se a Portaria trouxer só UMA das duas sanções (multa OU
+                       impedimento, não as duas), adapte a fórmula removendo a
+                       parte que não se aplica; avise que é um caso diferente
+                       do padrão.
+
+Regras:
+- Valores em reais no formato brasileiro (R$ 1.234,56); datas dd/mm/aaaa.
+- Não invente número de processo, percentual, valor ou prazo — o que estiver
+  ilegível/ambíguo, liste como pendência em vez de adivinhar.
+- Entregue primeiro uma PRÉVIA em tabela (uma linha por Portaria) para eu
+  conferir; depois de aprovar, gere um .xlsx SEPARADO só com a(s) linha(s)
+  nova(s), com a linha 1 de cabeçalhos (sem carimbo — a planilha real não leva
+  carimbo manual, ele é gravado pelo Apps Script).
+
+------------------------------------------------------------------------------
+
+Cabeçalhos (linha 1 do .xlsx), nesta ordem:
+cpf_ou_cnpj | razao_social | numero_contrato | objeto_contrato | motivo_sancao |
+data_fim_sancao | observacao

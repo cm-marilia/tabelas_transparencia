@@ -21,7 +21,11 @@ ver seção [Repositório de scripts](#repositório-de-scripts)).
 
 ```
 tabelas_transparencia/
-├── brasao_marilia.png    imagem do brasão, usada pelo README e pelas páginas
+├── brasao_marilia.png          imagem do brasão, usada pelo README e pelas páginas
+├── padrao-planilhas.md         formato que cada planilha do Google Sheets precisa ter
+├── COMO-ADICIONAR-UM-ANO.md    passo a passo para publicar a aba de um ano novo
+├── prompt-lancar-diarias.txt   prompt pronto: PDF de parecer de diárias → linhas da planilha
+├── prompt-lancar-apenados.txt  prompt pronto: PDF de Portaria de penalidade → linha da planilha
 ├── paginas/              páginas completas, hospedadas no GitHub Pages
 │   ├── comum.css              estilo compartilhado por todas as páginas
 │   ├── comum.js               funções compartilhadas (datas, exportação, iframe, etc.)
@@ -77,10 +81,15 @@ Google Sheets (planilha)
 
 Quando a estrutura de uma planilha muda (nome de aba, cabeçalho, nova aba
 de ano), a página em `paginas/` pode quebrar na hora — o formato esperado
-de cada planilha está documentado no topo de cada arquivo `.html`.
+de cada planilha (e o dicionário de colunas completo) está em
+[padrao-planilhas.md](padrao-planilhas.md); cada `.html` também repete um
+resumo no topo do próprio arquivo.
 
 Para publicar a aba de um ano novo (contratos, diárias, ...), ver
-[COMO-ADICIONAR-UM-ANO.md](COMO-ADICIONAR-UM-ANO.md).
+[COMO-ADICIONAR-UM-ANO.md](COMO-ADICIONAR-UM-ANO.md). Para lançar dados a
+partir de PDFs (pareceres de diárias, Portarias de penalidade), há prompts
+prontos: [prompt-lancar-diarias.txt](prompt-lancar-diarias.txt) e
+[prompt-lancar-apenados.txt](prompt-lancar-apenados.txt).
 
 ---
 
