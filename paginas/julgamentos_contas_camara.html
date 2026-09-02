@@ -381,7 +381,7 @@
                             <div class="card-header">
                                 <div class="card-header-texto">
                                     <span class="nome-principal">Exercício ${escapeHtml(d.exercicio || "—")}</span>
-                                    <span class="subtitulo-card">Contas anuais da Câmara Municipal</span>
+                                    <span class="subtitulo-card">Contas anuais da Câmara Municipal de Marília</span>
                                 </div>
                             </div>
                             <div class="card-body">
@@ -391,12 +391,15 @@
                                         <span class="info-valor">${escapeHtml(d.processo || "—")}</span>
                                     </div>
                                     <div class="info-col">
-                                        <span class="info-label">Julgamento</span>
-                                        <span class="info-valor">${escapeHtml(d.julgamento || "—")}</span>
-                                    </div>
-                                    <div class="info-col">
                                         <span class="info-label">Trânsito em Julgado</span>
                                         <span class="info-valor">${escapeHtml(transito || "—")}</span>
+                                    </div>
+                                </div>
+
+                                <div class="info-row" style="margin-top: 5px;">
+                                    <div class="info-col full-width">
+                                        <span class="info-label">Julgamento</span>
+                                        <span class="info-valor">${escapeHtml(d.julgamento || "—")}</span>
                                     </div>
                                 </div>
 
