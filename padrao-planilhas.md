@@ -240,7 +240,7 @@ ano quebraria a lógica.
 | `data_fim_sancao` | data | vazio = sanção sem prazo (sempre exibida) |
 | `observacao` | texto longo | narrativa da Portaria — fórmula fixa, ver `prompt-lancar-apenados.txt` na raiz do repositório `tabelas_transparencia` |
 
-### estagiarios — dividir por: *(a definir — ver pendências)*
+### estagiarios — aba única (não divide por ano)
 
 | Coluna | Tipo |
 |---|---|
@@ -320,8 +320,6 @@ ano quebraria a lógica.
 Itens ainda em aberto, por planilha — mover para o histórico (ou apagar)
 assim que resolvidos.
 
-- **estagiarios** — critério de divisão por aba ainda não definido (o
-  cadastro atravessa anos, diferente das demais planilhas de acervo).
 - **remuneracao_detalhada_servidores** — 4 colunas da planilha de origem
   (13–16) ainda não mapeadas para o dicionário da seção 6.
 - **servidores** — a planilha de origem tem uma 7ª coluna vazia, sem

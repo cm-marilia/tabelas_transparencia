@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<!-- ===========================================================================
+     ESTAGIÁRIOS — Câmara Municipal de Marília
+     ===========================================================================
+     Exibe o quadro de estagiários da Câmara em cards, com busca por nome,
+     filtro por situação (ativo/desligado) e por período de admissão ou
+     desligamento, exportação (CSV/Excel/JSON/XML) e impressão. Hospedada no
+     GitHub Pages e incorporada via <iframe> no site oficial
+     (marilia.sp.leg.br).
+
+     Os dados vêm de uma planilha do Google Sheets (aba única), publicada
+     como CSV — ver CSV_URL, logo no início do <script> abaixo.
+
+     Situação: sem data de desligamento (ou "-") = "Ativo"; com data =
+     "Desligado". A página abre já filtrada em "Ativos" (quadro atual).
+
+     Estilo e funções compartilhadas com as outras páginas: comum.css e
+     comum.js. Formato esperado da planilha: padrao-planilhas.md.
+     =========================================================================== -->
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Estagiários</title>
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="comum.css" />
+
+    <style>
+        /* O chrome (topo, painéis, loader, paginação, selo) vem de comum.css.
+           Aqui só o essencial específico de estagiários. */
+
+        .subtitulo-card { font-size: 12px; color: #64748b; font-weight: 500; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+
+<div id="wrapper">
+
+    <header class="topo">
+        <h1>Estagiários</h1>
+        <div class="logo-container">
+            <img src="../brasao_marilia.png" alt="Brasão de Marília" width="50" height="50" class="brasao">
+            <span class="texto-camara">Câmara Municipal de Marília</span>
+        </div>
+    </header>
+
+    <div id="cabecalho-impressao">
+        <img src="../brasao_marilia.png" width="63" height="70" alt="Brasão de Marília">
+        <div>
+            <h1 style="margin:0; color:#003b75;">Estagiários</h1>
+            <p style="margin:0; font-weight:bold;">Câmara Municipal de Marília</p>
+        </div>
+    </div>
+
+    <div id="loader" role="status" aria-live="polite">
+        <div class="spinner"></div>
+        <span>Carregando base de dados...</span>
+    </div>
+
+    <main id="main-container" style="display:none;">
+
+        <fieldset class="painel-grupo">
+            <legend class="titulo-painel titulo-painel--com-selo">
+                Filtros de Pesquisa
+                <span id="badge-atualizacao" class="badge-atualizacao">⏳ Sincronizando...</span>
+            </legend>
+
+            <div class="painel-filtros" style="margin-bottom: 10px;">
+                <input type="text" id="filtroNome" placeholder="Pesquisar por nome..." autocomplete="off" aria-label="Pesquisar por nome">
+                <select id="filtroStatus" aria-label="Filtrar por situação">
+                    <option value="">Situação</option>
+                    <option value="Ativo" selected>Ativos</option>
+                    <option value="Desligado">Desligados</option>
+                </select>
+                <select id="filtroTipoData" aria-label="Filtrar por tipo de data">
+                    <option value="">Filtrar período por...</option>
+                    <option value="admissao">Admissão</option>
+                    <option value="desligamento">Desligamento</option>
+                </select>
+            </div>
+
+            <div class="painel-filtros">
+                <select id="filtroMes" aria-label="Filtrar por mês">
+                    <option value="">Mês</option>
+                    <option value="01">Janeiro</option><option value="02">Fevereiro</option><option value="03">Março</option>
+                    <option value="04">Abril</option><option value="05">Maio</option><option value="06">Junho</option>
+                    <option value="07">Julho</option><option value="08">Agosto</option><option value="09">Setembro</option>
+                    <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
+                </select>
+                <select id="filtroAno" aria-label="Filtrar por ano"><option value="">Ano</option></select>
+                <button class="btn-filtro" onclick="limparFiltros()">Limpar filtros</button>
+            </div>
+        </fieldset>
+
+        <fieldset class="painel-grupo">
+            <legend class="titulo-painel">Exportação e Impressão</legend>
+            <div class="painel-exportacao">
+                <button onclick="exportarCSV()">⬇️ CSV</button>
+                <button onclick="exportarXLSX()">⬇️ Excel</button>
+                <button onclick="exportarJSON()">⬇️ JSON</button>
+                <button onclick="exportarXML()">⬇️ XML</button>
+                <button class="btn-acao" onclick="imprimirSeguro()">🖨️ Imprimir</button>
+            </div>
+        </fieldset>
+
+        <fieldset class="painel-grupo" id="painel-visualizacao" style="padding: 10px 15px;">
+            <legend class="titulo-painel">Visualização</legend>
+            <div class="dt-custom-header">
+                <div id="comprimento-tabela"></div>
+                <div id="contagem-registros" class="badge-contagem">0 registros encontrados</div>
+            </div>
+        </fieldset>
+
+        <table id="tabela" style="width:100%" role="presentation">
+            <thead><tr><th>Dados</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </main>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+<script>window.ORIGEM_PAI = "https://www.marilia.sp.leg.br";</script>
+<script src="comum.js"></script>
+
+<script>
+    /* removerAcentos, escapeHtml, escapeXml, formatarDataBR, buscarCSV,
+       indexarColunas, enviarAlturaIframe e o objeto Exportar vêm de comum.js. */
+
+    // ==== CONFIGURAÇÃO =====================================================
+
+    // Google Sheets → Arquivo → Compartilhar → Publicar na web → aba única → CSV.
+    const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTK8EGvu2R21KpD3-E3SFDVC5qfWSihafXCpj_Y-ZnpM9DNBEb_Gimw0TboxkpiuMqJQ01WNNHm8-FA/pub?output=csv";
+
+    // Campo interno → nome da coluna na planilha, por NOME (não posição).
+    const COL = {
+        nome:         ["nome_estagiario"],
+        admissao:     ["data_admissao"],
+        desligamento: ["data_desligamento"],
+    };
+
+    // ==== ESTADO GLOBAL =====================================================
+    let tabela;
+    let dadosGlobais = [];
+    let carimboAtualizacao = "";
+
+    // ==== CARREGAMENTO =======================================================
+
+    function processarCSV(text) {
+        const linhas = Papa.parse(text).data;
+
+        let carimbo = "";
+        if (linhas.length > 0 && linhas[0][0]) {
+            const m = String(linhas[0][0]).match(/(\d{2}\/\d{2}\/\d{4})[,\s]*(\d{2}:\d{2})?/);
+            if (m) carimbo = `Dados atualizados em ${m[1]}${m[2] ? ' ' + m[2] : ''}`;
+        }
+
+        let ic = 1;
+        for (let i = 0; i < Math.min(5, linhas.length); i++) {
+            const t = removerAcentos(linhas[i].join(" ").toLowerCase());
+            if (t.includes("nome_estagiario")) { ic = i; break; }
+        }
+
+        const idx = indexarColunas(linhas[ic]);
+        const posicao = {};
+        Object.keys(COL).forEach(campo => {
+            const nome = COL[campo].find(n => n in idx);
+            if (nome != null) posicao[campo] = idx[nome];
+        });
+
+        if (!("nome" in posicao)) {
+            throw new Error('A planilha não tem a coluna esperada "nome_estagiario".');
+        }
+
+        const pegar = (cols, campo) => {
+            const i = posicao[campo];
+            return (i != null && cols[i] != null) ? String(cols[i]).trim() : "";
+        };
+
+        const registros = linhas.slice(ic + 1).map(cols => {
+            const o = {
+                nome:         pegar(cols, "nome"),
+                admissao:     pegar(cols, "admissao"),
+                desligamento: pegar(cols, "desligamento"),
+            };
+            o.situacao = (!o.desligamento || o.desligamento === "-") ? "Ativo" : "Desligado";
+            o.busca_nome = removerAcentos((o.nome || "").toLowerCase());
+            return o;
+        }).filter(d => d.nome);
+
+        return { carimbo, registros };
+    }
+
+    async function carregarDados() {
+        $('#loader').show(); $('#main-container').hide();
+        try {
+            const { carimbo, registros } = processarCSV(await buscarCSV(CSV_URL));
+            dadosGlobais = registros;
+            carimboAtualizacao = carimbo || "Dados sincronizados";
+            popularFiltroAno();
+            aplicarFiltros();
+            $('#badge-atualizacao').text(`🟢 ${carimboAtualizacao}`);
+            $('#loader').hide();
+            $('#main-container').fadeIn(400, () => enviarAlturaIframe());
+        } catch (e) {
+            console.error("Erro ao carregar os dados: ", e);
+            $('#loader').html(`<b style="color:#b91c1c">Não foi possível carregar os dados.<br>${escapeHtml(e.message)}<br><br>Tente recarregar a página.</b>`);
+        }
+    }
+
+    // ==== FILTROS ============================================================
+
+    /** Preenche o filtro de Ano reunindo os anos de admissão e desligamento
+        presentes na planilha, do mais recente para o mais antigo. */
+    function popularFiltroAno() {
+        const anos = new Set();
+        dadosGlobais.forEach(d => {
+            const aAdm = formatarDataBR(d.admissao).split('/')[2];
+            const aDes = d.desligamento && d.desligamento !== "-" ? formatarDataBR(d.desligamento).split('/')[2] : null;
+            if (aAdm) anos.add(aAdm);
+            if (aDes) anos.add(aDes);
+        });
+        const lista = [...anos].filter(a => a && a.length === 4).sort((a, b) => b - a);
+
+        $('#filtroAno').html('<option value="">Ano</option>');
+        lista.forEach(a => $('#filtroAno').append(new Option(a, a)));
+    }
+
+    /**
+     * Regras do filtro de período (mês/ano):
+     * - "Admissão": compara com a data de admissão
+     * - "Desligamento": compara com a data de desligamento
+     * - Sem tipo escolhido: basta a admissão OU o desligamento cair no
+     *   período (útil para "o que aconteceu em maio/2026?")
+     *
+     * Ordenação: Ativos primeiro; dentro de cada grupo, ordem alfabética.
+     */
+    function aplicarFiltros() {
+        const txt = removerAcentos($('#filtroNome').val().toLowerCase());
+        const sit = $('#filtroStatus').val();
+        const tipoData = $('#filtroTipoData').val();
+        const mes = $('#filtroMes').val();
+        const ano = $('#filtroAno').val();
+
+        const casaPeriodo = (dataStr) => {
+            const f = formatarDataBR(dataStr);
+            if (!/^\d{2}\/\d{2}\/\d{4}$/.test(f)) return false;
+            const [, mm, aaaa] = f.split('/');
+            return (!mes || mm === mes) && (!ano || aaaa === ano);
+        };
+
+        const res = dadosGlobais.filter(d => {
+            const matchNome = !txt || d.busca_nome.includes(txt);
+            const matchSit = !sit || d.situacao === sit;
+
+            let matchData = true;
+            if (tipoData || mes || ano) {
+                const mAdm = d.admissao ? casaPeriodo(d.admissao) : false;
+                const mDes = (d.desligamento && d.desligamento !== "-") ? casaPeriodo(d.desligamento) : false;
+
+                if (tipoData === 'admissao') matchData = mAdm;
+                else if (tipoData === 'desligamento') matchData = mDes;
+                else matchData = mAdm || mDes;
+            }
+            return matchNome && matchSit && matchData;
+        });
+
+        res.sort((a, b) => {
+            if (a.situacao !== b.situacao) return a.situacao === "Ativo" ? -1 : 1;
+            return (a.nome || "").localeCompare(b.nome || "");
+        });
+
+        renderizarTabela(res);
+    }
+
+    function limparFiltros() {
+        $('#filtroNome').val('');
+        $('select').val('');
+        $('#filtroStatus').val('Ativo');
+        aplicarFiltros();
+    }
+
+    // ==== TABELA DE CARDS ====================================================
+
+    function inicializarTabela() {
+        tabela = $('#tabela').DataTable({
+            data: [],
+            pageLength: 10,
+            ordering: false,
+            language: { url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json', lengthMenu: "Exibir _MENU_ resultados", emptyTable: "Nenhum estagiário cadastrado." },
+            dom: 'lrt<"dt-bottom-controls"ip>',
+            columns: [{
+                data: null,
+                render: function (d) {
+                    const statusClass = d.situacao === 'Ativo' ? 'status-ativo' : 'status-desligado';
+                    return `
+                        <div class="card-info">
+                            <div class="card-header">
+                                <div class="card-header-texto">
+                                    <span class="nome-principal">${escapeHtml(d.nome)}</span>
+                                    <span class="subtitulo-card">Estagiário(a)</span>
+                                </div>
+                                <span class="status-badge ${statusClass}">${escapeHtml(d.situacao)}</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="info-col"><span class="info-label">Lotação</span><span class="info-valor">Câmara Municipal</span></div>
+                                <div class="info-col"><span class="info-label">Admissão</span><span class="info-valor">${escapeHtml(formatarDataBR(d.admissao) || "—")}</span></div>
+                                <div class="info-col"><span class="info-label">Desligamento</span><span class="info-valor">${escapeHtml(formatarDataBR(d.desligamento) || "—")}</span></div>
+                            </div>
+                        </div>`;
+                }
+            }],
+            initComplete: function () { $('.dataTables_length').appendTo('#comprimento-tabela'); },
+            drawCallback: function () {
+                $('#contagem-registros').html(`<b>${this.api().rows().count()}</b> registros encontrados`);
+                enviarAlturaIframe();
+            }
+        });
+
+        tabela.on('page.dt', function () {
+            setTimeout(() => document.getElementById('painel-visualizacao').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+        });
+    }
+
+    function renderizarTabela(dados) {
+        if (!tabela) inicializarTabela();
+        tabela.clear();
+        tabela.rows.add(dados);
+        tabela.draw();
+    }
+
+    // ==== EXPORTAÇÕES (implementação em comum.js, objeto Exportar) =========
+
+    function dadosParaExportar() {
+        return tabela.rows().data().toArray().map(d => ({
+            "Nome": d.nome || '',
+            "Situação": d.situacao || '',
+            "Admissão": formatarDataBR(d.admissao) || '',
+            "Desligamento": formatarDataBR(d.desligamento) || ''
+        }));
+    }
+
+    function gerarNomeArquivoBase() {
+        let partes = ["estagiarios"];
+        const nome = $('#filtroNome').val().trim();
+        if (nome) partes.push(nome.replace(/\s+/g, '_'));
+        if ($('#filtroStatus').val()) partes.push($('#filtroStatus').val());
+        if ($('#filtroMes').val()) partes.push($('#filtroMes option:selected').text());
+        if ($('#filtroAno').val()) partes.push($('#filtroAno').val());
+        return removerAcentos(partes.join('_')).replace(/[^a-zA-Z0-9_]/g, '').toLowerCase();
+    }
+
+    function exportarCSV()  { Exportar.csv(dadosParaExportar(), gerarNomeArquivoBase()); }
+    function exportarXLSX() { Exportar.xlsx(dadosParaExportar(), gerarNomeArquivoBase(), "Estagiários"); }
+    function exportarJSON() { Exportar.json(dadosParaExportar(), gerarNomeArquivoBase()); }
+    function exportarXML()  { Exportar.xml(dadosParaExportar(), gerarNomeArquivoBase(), { raiz: "estagiarios", item: "estagiario" }); }
+
+    // ==== IMPRESSÃO ==========================================================
+
+    function imprimirSeguro() {
+        if (!tabela) return;
+        const len = tabela.page.len();
+        tabela.one('draw.dt', function () {
+            setTimeout(() => { window.print(); tabela.page.len(len).draw('page'); }, 100);
+        });
+        tabela.page.len(-1).draw('page');
+    }
+
+    // ==== INICIALIZAÇÃO ======================================================
+    $(document).ready(function () {
+        let debounce;
+        $('#filtroNome').on('input', function () {
+            clearTimeout(debounce);
+            debounce = setTimeout(aplicarFiltros, 250);
+        });
+        $('select').on('change', aplicarFiltros);
+        carregarDados();
+    });
+</script>
+</body>
+</html>
