@@ -61,7 +61,7 @@ body { font-family: 'Inter', Arial, sans-serif; margin: 0; background: #f1f5f9; 
    Colapsa para 2 colunas (≤1024px) e 1 coluna (≤768px).
    -------------------------------------------------------------------- */
 select, input { height: 38px; border-radius: 6px; border: 1px solid #cbd5e1; padding: 0 10px; font-size: 13px; box-sizing: border-box; width: 100%; }
-button.btn-filtro { height: 38px; border-radius: 6px; background: #003b75; color: white; font-weight: 600; cursor: pointer; border: none; transition: 0.2s; width: 100%; }
+button.btn-filtro { height: 38px; padding: 0 18px; border-radius: 6px; background: #003b75; color: white; font-weight: 600; cursor: pointer; border: none; transition: 0.2s; width: 100%; white-space: nowrap; }
 button.btn-filtro:hover { background: #00274d; }
 
 .painel-filtros { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
