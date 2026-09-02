@@ -1,0 +1,133 @@
+<!-- ===========================================================================
+     SEÇÃO "ESTAGIÁRIOS" — SITE OFICIAL
+     Câmara Municipal de Marília | https://www.marilia.sp.leg.br/
+
+     O QUE É ESTE CÓDIGO
+     Texto explicativo sobre o quadro de estagiários + iframe que incorpora
+     o painel hospedado no GitHub Pages + script que ajusta a altura do
+     iframe automaticamente.
+
+     ⚠️ IMPORTANTE: todos os estilos são INLINE de propósito — o editor do
+     site remove blocos <style> ao salvar. Não converta para classes/<style>.
+     Cole apenas este fragmento no editor (sem <!DOCTYPE>, <html>, <head>
+     ou <body> — o site já fornece essa estrutura).
+
+     MANUTENÇÃO RÁPIDA
+     - Endereço do painel ........ src do iframe e link "tela cheia":
+       https://cm-marilia.github.io/tabelas_transparencia/paginas/estagiarios.html
+       (repo cm-marilia/tabelas_transparencia, pasta paginas/)
+     =========================================================================== -->
+
+<section class="manual-estagiarios" style="margin-top: 20px;">
+
+    <p style="text-align: justify;">
+        O relatório de estagiários é uma ferramenta de transparência pública e gestão que reúne as informações cadastrais e o histórico de contratos de todos os estudantes vinculados à Câmara Municipal de Marília. Ele serve para que tanto os cidadãos quanto a administração interna possam consultar, fiscalizar e auditar de forma rápida os períodos de admissão, os desligamentos e o quantitativo do quadro de estágio da instituição.
+    </p>
+
+    <hr />
+
+    <h3 style="text-align: justify;">🔎 Principais Funcionalidades e Filtros</h3>
+
+    <p style="text-align: justify;">
+        O painel de pesquisa foi projetado para facilitar a localização rápida de registros e a auditoria de períodos de contratos de estágio.
+    </p>
+
+    <p style="text-align: justify;">
+        Para pesquisar por um estagiário específico, utilize o campo <strong>Pesquisar por nome</strong> e digite o nome completo ou parte dele. O sistema localiza o estudante instantaneamente na base de dados e, para sua conveniência, desconsidera acentos ou diferenças entre letras maiúsculas e minúsculas.
+    </p>
+
+    <p style="text-align: justify;">
+        Por padrão, o sistema inicializa exibindo apenas os estagiários com contratos na situação de <strong>Ativos</strong>. Caso você queira consultar o histórico de contratos já encerrados, altere o menu de seleção para a opção <strong>Desligados</strong>.
+    </p>
+
+    <p style="text-align: justify;">
+        Também é possível refinar a sua busca escolhendo o critério de período temporal através do menu <strong>Filtrar período por</strong>, selecionando entre as opções <strong>Admissão</strong> ou <strong>Desligamento</strong>, e combinando essa escolha com os menus subsequentes de <strong>Mês</strong> e <strong>Ano</strong>.
+    </p>
+
+    <p style="text-align: justify;">
+        Caso queira limpar todos os parâmetros aplicados e recomeçar a sua busca do zero, basta clicar no botão <strong>Limpar filtros</strong>, que restaura todos os campos e menus ao estado original da página com apenas um clique.
+    </p>
+
+    <hr />
+
+   <h3>📤 Ferramentas de Exportação e Impressão</h3>
+
+    <p style="text-align: justify;">
+        Na seção dedicada à exportação e impressão, você pode salvar e extrair os dados filtrados na tela em quatro formatos digitais distintos, além da opção de impressão física. Os arquivos baixados são nomeados automaticamente de forma inteligente, baseando-se nos filtros exatos aplicados na tela.
+    </p>
+
+    <p><strong>Opções disponíveis:</strong></p>
+
+    <ul style="padding-left: 40px; list-style-type: none; margin-bottom: 20px;">
+        <li style="margin-bottom: 12px; text-align: justify;">
+            <strong>📄 Exportação para CSV:</strong> Gera um arquivo de texto com dados separados por vírgulas, formato ideal para integração rápida com outros sistemas ou bancos de dados. A exportação inclui uma marcação especial que evita a corrupção de caracteres ou símbolos da língua portuguesa.
+        </li>
+        <li style="margin-bottom: 12px; text-align: justify;">
+            <strong>📊 Exportação para Excel:</strong> Gera uma planilha eletrônica nativa do Microsoft Excel, permitindo que você edite, crie fórmulas, gráficos e faça análises detalhadas do quadro de funcionários diretamente no seu computador.
+        </li>
+        <li style="margin-bottom: 12px; text-align: justify;">
+            <strong>🧩 Exportação para JSON:</strong> Exporta os dados estruturados em formato de notação de objetos JavaScript, uma linguagem padrão e leve de intercâmbio de dados, amplamente utilizada por profissionais de tecnologia para comunicação entre sistemas.
+        </li>
+        <li style="margin-bottom: 12px; text-align: justify;">
+            <strong>🗂️ Exportação para XML:</strong> Converte a listagem em um arquivo de linguagem de marcação extensível, estruturando os dados em tags hierárquicas muito utilizadas em auditorias e integrações institucionais de controle externo.
+        </li>
+        <li style="margin-bottom: 12px; text-align: justify;">
+            <strong>🖨️ Função Imprimir:</strong> Formata automaticamente a página inteira para impressão, ocultando botões e filtros para economizar espaço e tinta. Ela ativa um cabeçalho institucional limpo e otimizado para a realização de impressões físicas ou para a geração do relatório em formato PDF diretamente no seu computador.
+        </li>
+    </ul>
+
+    <div class="recomendacao-acesso">
+        <hr />
+        <h3 style="text-align: justify;">💡 Recomendação de Acesso</h3>
+
+        <p style="text-align: justify;">
+            Embora o relatório possua tecnologia responsiva compatível com celulares e tablets, a melhor experiência de navegação e visualização das informações ocorre em tela cheia no computador.
+        </p>
+
+        <p style="text-align: justify;">
+            🔗 <strong>Link para utilização em tela cheia:</strong><br>
+            <a href="https://cm-marilia.github.io/tabelas_transparencia/paginas/estagiarios.html" target="_blank" rel="noopener noreferrer" style="color: #003b75; font-weight: bold;">
+                Clique aqui para acessar o relatório em tela cheia
+            </a>
+        </p>
+    </div>
+
+</section>
+
+<!-- ====================================================================
+     IFRAME — painel de consulta hospedado no GitHub Pages
+     A altura inicial (800px) vale só até a primeira mensagem do painel;
+     depois disso o script abaixo ajusta a altura automaticamente ao
+     conteúdo. Sem "scrolling=no": se a mensagem de altura não chegar
+     (erro de script no painel, bloqueio de rede), o iframe rola
+     internamente e nada é cortado. Quando o ajuste funciona, a altura
+     fica exata e não há rolagem.
+     ==================================================================== -->
+<iframe
+    id="iframe-estagiarios"
+    src="https://cm-marilia.github.io/tabelas_transparencia/paginas/estagiarios.html"
+    loading="lazy"
+    style="border: none; width: 1px; min-width: 100%; height: 800px; transition: height 0.3s ease-in-out;"
+    title="Consulta de Estagiários - Câmara Municipal de Marília">
+</iframe>
+
+<!-- ====================================================================
+     SCRIPT — ajuste automático de altura do iframe
+     Proteções: só aceita mensagens do GitHub Pages oficial (event.origin),
+     vindas DESTE iframe (event.source), com altura numérica válida.
+     ==================================================================== -->
+<script>
+    window.addEventListener('message', function (event) {
+        if (event.origin !== 'https://cm-marilia.github.io') return;
+
+        var iframe = document.getElementById('iframe-estagiarios');
+        if (!iframe || event.source !== iframe.contentWindow) return;
+
+        if (event.data && event.data.tipo === 'ajustarAltura') {
+            var altura = parseInt(event.data.valor, 10);
+            if (!isNaN(altura) && altura > 200) {
+                iframe.style.height = altura + 'px';
+            }
+        }
+    }, false);
+</script>
