@@ -257,7 +257,20 @@
             linha; o prefixo BOM (﻿) garante acentos corretos no Excel. */
         csv: function (linhas, nomeBase) {
             try {
-                var csv = "﻿" + Papa.unparse(linhas);
+                // Números com vírgula decimal (padrão BR): o Excel em
+                // português não reconhece "3966.67" como número (ponto =
+                // separador de milhar por lá) e descarta o ponto, virando
+                // "396667". A vírgula fica entre aspas automaticamente
+                // (PapaParse cuida disso), então a coluna não quebra.
+                var linhasBR = linhas.map(function (linha) {
+                    var nova = {};
+                    Object.keys(linha).forEach(function (chave) {
+                        var v = linha[chave];
+                        nova[chave] = (typeof v === "number") ? String(v).replace(".", ",") : v;
+                    });
+                    return nova;
+                });
+                var csv = "﻿" + Papa.unparse(linhasBR);
                 downloadFile(csv, nomeBase + ".csv", "text/csv;charset=utf-8");
             } catch (e) { alert("Erro ao exportar CSV: " + e.message); console.error(e); }
         },
