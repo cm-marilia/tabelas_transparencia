@@ -248,14 +248,14 @@ ano quebraria a lógica.
 | `data_admissao` | data |
 | `data_desligamento` | data, pode ser vazio |
 
-### julgamentos_contas_camara — dividir por: `exercicio`
+### julgamentos_contas_camara — aba única (não divide por ano)
 
 | Coluna | Tipo |
 |---|---|
 | `exercicio` | texto |
-| `numero_processo` | texto |
-| `resultado_julgamento` | texto |
-| `data_transito_julgado` | data |
+| `processo` | texto |
+| `julgamento` | texto |
+| `transito_julgado` | data |
 | `itens_irregulares` | texto, pode ser vazio |
 
 ### painel_manifestacoes — dividir por: ano da `data_abertura`
