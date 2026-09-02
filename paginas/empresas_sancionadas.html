@@ -72,13 +72,13 @@
     <header class="topo">
         <h1>Relatório de Licitantes Apenados</h1>
         <div class="logo-container">
-            <img src="../brasao_marilia.png" alt="Brasão de Marília" width="50" height="50" class="brasao">
+            <img src="brasao_marilia.png" alt="Brasão de Marília" width="50" height="50" class="brasao">
             <span class="texto-camara">Câmara Municipal de Marília</span>
         </div>
     </header>
 
     <div id="cabecalho-impressao">
-        <img src="../brasao_marilia.png" width="63" height="70" alt="Brasão de Marília">
+        <img src="brasao_marilia.png" width="63" height="70" alt="Brasão de Marília">
         <div>
             <h1 style="margin:0; color:#003b75;">Relatório de Licitantes Apenados</h1>
             <p style="margin:0; font-weight:bold;">Câmara Municipal de Marília</p>
@@ -245,7 +245,10 @@
         $('#loader').show(); $('#main-container').hide();
         try {
             const { carimbo, registros } = processarCSV(await buscarCSV(CSV_URL));
-            dadosGlobais = registros;
+            // Mais recente primeiro: a planilha não tem data de aplicação da
+            // sanção, só a de fim — usamos a ordem de inserção como proxy
+            // (linha nova = sanção mais recente).
+            dadosGlobais = registros.reverse();
             carimboAtualizacao = carimbo || "Dados sincronizados";
             aplicarFiltros();
             $('#badge-atualizacao').text(`🟢 ${carimboAtualizacao}`);
