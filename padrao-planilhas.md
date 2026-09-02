@@ -320,12 +320,6 @@ ano quebraria a lógica.
 Itens ainda em aberto, por planilha — mover para o histórico (ou apagar)
 assim que resolvidos.
 
-- **contratos** — 4 CNPJs com erro de digitação: aba 2026 linhas 14
-  (`06.7871909/0001-18`) e 15 (`35.093.155/0001-0`); aba 2025 linhas 62
-  (`015.655.026/0001-45`) e 70 (`67.564.773/001-71`).
-- **diárias** — gabinetes da 20ª legislatura (18 nomes) são um rascunho
-  reconstruído a partir das diárias 2023–24 e dos reeleitos de 2024; falta
-  confirmar a lista oficial.
 - **estagiarios** — critério de divisão por aba ainda não definido (o
   cadastro atravessa anos, diferente das demais planilhas de acervo).
 - **remuneracao_detalhada_servidores** — 4 colunas da planilha de origem
