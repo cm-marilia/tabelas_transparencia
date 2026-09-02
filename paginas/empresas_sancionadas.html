@@ -37,7 +37,7 @@
         /* O chrome (topo, painéis, loader, paginação, selo) vem de comum.css.
            Aqui só o card com grade de 3 colunas + acordeão de observações. */
 
-        .painel-filtros { grid-template-columns: 2fr 1fr 1fr auto; }
+        .painel-filtros { grid-template-columns: 2fr 1fr auto; }
 
         .subtitulo-card { font-size: 12px; color: #64748b; font-weight: 500; text-transform: uppercase; }
 
@@ -99,7 +99,6 @@
             </legend>
             <div class="painel-filtros">
                 <input type="text" id="filtroTexto" placeholder="Pesquisar por razão social ou CNPJ/CPF..." autocomplete="off" aria-label="Pesquisar por razão social ou CNPJ/CPF">
-                <input type="text" id="filtroContrato" placeholder="Número do contrato..." autocomplete="off" aria-label="Pesquisar por número do contrato">
                 <select id="filtroSituacao" aria-label="Filtrar por situação da sanção">
                     <option value="vigente">Sanções vigentes</option>
                     <option value="encerrada">Sanções encerradas</option>
@@ -266,29 +265,26 @@
     function aplicarFiltros() {
         const busca = removerAcentos($('#filtroTexto').val().toLowerCase());
         const buscaDigitos = busca.replace(/\D/g, "");
-        const buscaContrato = removerAcentos($('#filtroContrato').val().toLowerCase());
         const situacao = $('#filtroSituacao').val();
 
         const filtrados = dadosGlobais.filter(d => {
             const matchTexto = !busca
                 || d.busca_nome.includes(busca)
                 || (buscaDigitos && d.busca_nome.includes(buscaDigitos));
-            const matchContrato = !buscaContrato
-                || (d.numero_contrato && removerAcentos(d.numero_contrato.toLowerCase()).includes(buscaContrato));
 
             const ativa = sancaoAtiva(d.fim_sancao);
             const matchSituacao = !situacao
                 || (situacao === 'vigente' && ativa)
                 || (situacao === 'encerrada' && !ativa);
 
-            return matchTexto && matchContrato && matchSituacao;
+            return matchTexto && matchSituacao;
         });
 
         renderizarTabela(filtrados);
     }
 
     function limparFiltros() {
-        $('#filtroTexto, #filtroContrato').val('');
+        $('#filtroTexto').val('');
         $('#filtroSituacao').val('vigente');
         aplicarFiltros();
     }
@@ -394,8 +390,6 @@
         let partes = ["licitantes_apenados"];
         const texto = $('#filtroTexto').val().trim();
         if (texto) partes.push(texto.replace(/\s+/g, '_'));
-        const contrato = $('#filtroContrato').val().trim();
-        if (contrato) partes.push("contrato_" + contrato.replace(/[^a-zA-Z0-9]/g, ''));
         return removerAcentos(partes.join('_')).replace(/[^a-zA-Z0-9_]/g, '').toLowerCase();
     }
 
@@ -418,7 +412,7 @@
     // ==== INICIALIZAÇÃO ======================================================
     $(document).ready(function () {
         let debounce;
-        $('#filtroTexto, #filtroContrato').on('input', function () {
+        $('#filtroTexto').on('input', function () {
             clearTimeout(debounce);
             debounce = setTimeout(aplicarFiltros, 250);
         });
