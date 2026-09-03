@@ -35,6 +35,9 @@
            Aqui só o essencial específico de estagiários. */
 
         .subtitulo-card { font-size: 12px; color: #64748b; font-weight: 500; text-transform: uppercase; }
+
+        /* Lotação/Admissão/Desligamento na mesma linha (só nesta página). */
+        .card-body { flex-direction: row; flex-wrap: wrap; }
     </style>
 </head>
 <body>
@@ -311,7 +314,7 @@
                                 <span class="status-badge ${statusClass}">${escapeHtml(d.situacao)}</span>
                             </div>
                             <div class="card-body">
-                                <div class="info-col"><span class="info-label">Lotação</span><span class="info-valor">Câmara Municipal</span></div>
+                                <div class="info-col"><span class="info-label">Lotação</span><span class="info-valor">Câmara Municipal de Marília</span></div>
                                 <div class="info-col"><span class="info-label">Admissão</span><span class="info-valor">${escapeHtml(formatarDataBR(d.admissao) || "—")}</span></div>
                                 <div class="info-col"><span class="info-label">Desligamento</span><span class="info-valor">${escapeHtml(formatarDataBR(d.desligamento) || "—")}</span></div>
                             </div>
