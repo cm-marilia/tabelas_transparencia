@@ -77,6 +77,11 @@
                     <option value="Ativo" selected>Ativos</option>
                     <option value="Desligado">Desligados</option>
                 </select>
+                <select id="filtroTipoData" aria-label="Filtrar por tipo de data">
+                    <option value="">Filtrar período por...</option>
+                    <option value="admissao">Admissão</option>
+                    <option value="desligamento">Desligamento</option>
+                </select>
             </div>
 
             <div class="painel-filtros">
@@ -230,15 +235,18 @@
     }
 
     /**
-     * Regra do filtro de período (mês/ano): basta a admissão OU o
-     * desligamento cair no período (útil para "o que aconteceu em
-     * maio/2026?").
+     * Regras do filtro de período (mês/ano):
+     * - "Admissão": compara com a data de admissão
+     * - "Desligamento": compara com a data de desligamento
+     * - Sem tipo escolhido: basta a admissão OU o desligamento cair no
+     *   período (útil para "o que aconteceu em maio/2026?")
      *
      * Ordenação: Ativos primeiro; dentro de cada grupo, ordem alfabética.
      */
     function aplicarFiltros() {
         const txt = removerAcentos($('#filtroNome').val().toLowerCase());
         const sit = $('#filtroStatus').val();
+        const tipoData = $('#filtroTipoData').val();
         const mes = $('#filtroMes').val();
         const ano = $('#filtroAno').val();
 
@@ -254,10 +262,13 @@
             const matchSit = !sit || d.situacao === sit;
 
             let matchData = true;
-            if (mes || ano) {
+            if (tipoData || mes || ano) {
                 const mAdm = d.admissao ? casaPeriodo(d.admissao) : false;
                 const mDes = (d.desligamento && d.desligamento !== "-") ? casaPeriodo(d.desligamento) : false;
-                matchData = mAdm || mDes;
+
+                if (tipoData === 'admissao') matchData = mAdm;
+                else if (tipoData === 'desligamento') matchData = mDes;
+                else matchData = mAdm || mDes;
             }
             return matchNome && matchSit && matchData;
         });
