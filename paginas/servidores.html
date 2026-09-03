@@ -4,7 +4,7 @@
      ===========================================================================
      Exibe o quadro de servidores da Câmara em cards, com busca por nome,
      filtros por cargo, lotação, situação (ativo/desligado) e período
-     (admissão/demissão), exportação (CSV/Excel/JSON/XML) e impressão.
+     (admissão/desligamento), exportação (CSV/Excel/JSON/XML) e impressão.
      Hospedada no GitHub Pages e incorporada via <iframe> no site oficial
      (marilia.sp.leg.br).
 
@@ -12,7 +12,7 @@
      quadro atual), publicada como CSV — ver CSV_URL, logo no início do
      <script> abaixo.
 
-     Situação: sem data de demissão (ou "-") = "Ativo"; com data =
+     Situação: sem data de desligamento (ou "-") = "Ativo"; com data =
      "Desligado". A página abre já filtrada em "Ativos" (quadro atual).
 
      Estilo e funções compartilhadas com as outras páginas: comum.css e
@@ -78,7 +78,7 @@
                 <select id="filtroTipoData" aria-label="Filtrar por tipo de data">
                     <option value="">Filtrar período por...</option>
                     <option value="admissao">Admissão</option>
-                    <option value="demissao">Demissão</option>
+                    <option value="desligamento">Desligamento</option>
                 </select>
             </div>
 
@@ -95,7 +95,7 @@
                     <option value="07">Julho</option><option value="08">Agosto</option><option value="09">Setembro</option>
                     <option value="10">Outubro</option><option value="11">Novembro</option><option value="12">Dezembro</option>
                 </select>
-                <select id="filtroAno" aria-label="Filtrar por ano"><option value="">Ano</option></select>
+                <select id="filtroAno" aria-label="Filtrar por ano"><option value="">Ano</option><option value="2026" selected>2026</option></select>
                 <button class="btn-filtro" onclick="limparFiltros()">Limpar filtros</button>
             </div>
         </fieldset>
@@ -149,7 +149,7 @@
         cargo:    ["cargo"],
         lotacao:  ["lotacao"],
         admissao: ["data_admissao"],
-        demissao: ["data_demissao"],
+        desligamento: ["data_desligamento"],
         jornada:  ["jornada"],
     };
 
@@ -197,11 +197,11 @@
                 cargo:    pegar(cols, "cargo"),
                 lotacao:  pegar(cols, "lotacao"),
                 admissao: pegar(cols, "admissao"),
-                demissao: pegar(cols, "demissao"),
+                desligamento: pegar(cols, "desligamento"),
                 jornada:  pegar(cols, "jornada"),
             };
             if (o.jornada && removerAcentos(o.jornada.toLowerCase()) === "padrao") o.jornada = "40h/semana";
-            o.situacao = (!o.demissao || o.demissao === "-") ? "Ativo" : "Desligado";
+            o.situacao = (!o.desligamento || o.desligamento === "-") ? "Ativo" : "Desligado";
             o.busca_nome = removerAcentos((o.nome || "").toLowerCase());
             return o;
         }).filter(d => d.nome);
@@ -229,7 +229,8 @@
     // ==== FILTROS ============================================================
 
     /** Preenche os filtros de Cargo, Lotação e Ano com os valores existentes
-        na planilha. O filtro de Ano reúne anos de admissão e demissão. */
+        na planilha. O filtro de Ano reúne anos de admissão e desligamento.
+        Ano inicial: 2026 (se existir na lista). */
     function popularFiltrosDynamic() {
         const cargos = [...new Set(dadosGlobais.map(d => d.cargo))].filter(Boolean).sort();
         $('#filtroCargo').html('<option value="">Cargo</option>');
@@ -242,21 +243,22 @@
         const anos = new Set();
         dadosGlobais.forEach(d => {
             const aAdm = formatarDataBR(d.admissao).split('/')[2];
-            const aDem = d.demissao && d.demissao !== "-" ? formatarDataBR(d.demissao).split('/')[2] : null;
+            const aDes = d.desligamento && d.desligamento !== "-" ? formatarDataBR(d.desligamento).split('/')[2] : null;
             if (aAdm) anos.add(aAdm);
-            if (aDem) anos.add(aDem);
+            if (aDes) anos.add(aDes);
         });
         const lista = [...anos].filter(a => a && a.length === 4).sort((a, b) => b - a);
 
         $('#filtroAno').html('<option value="">Ano</option>');
         lista.forEach(a => $('#filtroAno').append(new Option(a, a)));
+        if (lista.includes('2026')) $('#filtroAno').val('2026');
     }
 
     /**
      * Regras do filtro de período (mês/ano):
      * - "Admissão": compara com a data de admissão
-     * - "Demissão": compara com a data de demissão
-     * - Sem tipo escolhido: basta a admissão OU a demissão cair no
+     * - "Desligamento": compara com a data de desligamento
+     * - Sem tipo escolhido: basta a admissão OU o desligamento cair no
      *   período (útil para "o que aconteceu em maio/2026?")
      *
      * Ordenação: Ativos primeiro; dentro de cada grupo, ordem alfabética.
@@ -286,11 +288,11 @@
             let matchData = true;
             if (tipoData || mes || ano) {
                 const mAdm = d.admissao ? casaPeriodo(d.admissao) : false;
-                const mDem = (d.demissao && d.demissao !== "-") ? casaPeriodo(d.demissao) : false;
+                const mDes = (d.desligamento && d.desligamento !== "-") ? casaPeriodo(d.desligamento) : false;
 
                 if (tipoData === 'admissao') matchData = mAdm;
-                else if (tipoData === 'demissao') matchData = mDem;
-                else matchData = mAdm || mDem;
+                else if (tipoData === 'desligamento') matchData = mDes;
+                else matchData = mAdm || mDes;
             }
             return matchNome && matchCargo && matchLot && matchSit && matchData;
         });
@@ -307,6 +309,7 @@
         $('#filtroNome').val('');
         $('select').val('');
         $('#filtroSituacao').val('Ativo');
+        if ($('#filtroAno option[value="2026"]').length) $('#filtroAno').val('2026');
         aplicarFiltros();
     }
 
@@ -337,7 +340,7 @@
                                     <div class="info-col"><span class="info-label">Lotação</span><span class="info-valor">${escapeHtml(d.lotacao) || "—"}</span></div>
                                     <div class="info-col"><span class="info-label">Jornada</span><span class="info-valor">${escapeHtml(d.jornada) || "—"}</span></div>
                                     <div class="info-col"><span class="info-label">Admissão</span><span class="info-valor">${escapeHtml(formatarDataBR(d.admissao) || "—")}</span></div>
-                                    <div class="info-col"><span class="info-label">Demissão</span><span class="info-valor">${escapeHtml(formatarDataBR(d.demissao) || "—")}</span></div>
+                                    <div class="info-col"><span class="info-label">Desligamento</span><span class="info-valor">${escapeHtml(formatarDataBR(d.desligamento) || "—")}</span></div>
                                 </div>
                             </div>
                         </div>`;
@@ -372,7 +375,7 @@
             "Jornada": d.jornada || '',
             "Situação": d.situacao || '',
             "Admissão": formatarDataBR(d.admissao) || '',
-            "Demissão": formatarDataBR(d.demissao) || ''
+            "Desligamento": formatarDataBR(d.desligamento) || ''
         }));
     }
 

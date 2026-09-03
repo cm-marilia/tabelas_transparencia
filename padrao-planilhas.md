@@ -310,7 +310,7 @@ ano quebraria a lógica.
 | `cargo` | texto |
 | `lotacao` | texto |
 | `data_admissao` | data |
-| `data_demissao` | data, vazio = ativo |
+| `data_desligamento` | data, vazio = ativo |
 | `jornada` | texto |
 
 ---
