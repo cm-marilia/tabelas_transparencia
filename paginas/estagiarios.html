@@ -71,13 +71,8 @@
             </legend>
 
             <div class="painel-filtros" style="margin-bottom: 10px;">
-                <input type="text" id="filtroNome" placeholder="Pesquisar por nome..." autocomplete="off" aria-label="Pesquisar por nome">
-                <select id="filtroStatus" aria-label="Filtrar por situação">
-                    <option value="">Situação</option>
-                    <option value="Ativo" selected>Ativos</option>
-                    <option value="Desligado">Desligados</option>
-                </select>
-                <select id="filtroTipoData" aria-label="Filtrar por tipo de data">
+                <input type="text" id="filtroNome" class="span-2" placeholder="Pesquisar por nome..." autocomplete="off" aria-label="Pesquisar por nome">
+                <select id="filtroTipoData" class="span-2" aria-label="Filtrar por tipo de data">
                     <option value="">Filtrar período por...</option>
                     <option value="admissao">Admissão</option>
                     <option value="desligamento">Desligamento</option>
@@ -85,6 +80,11 @@
             </div>
 
             <div class="painel-filtros">
+                <select id="filtroStatus" aria-label="Filtrar por situação">
+                    <option value="">Situação</option>
+                    <option value="Ativo" selected>Ativos</option>
+                    <option value="Desligado">Desligados</option>
+                </select>
                 <select id="filtroMes" aria-label="Filtrar por mês">
                     <option value="">Mês</option>
                     <option value="01">Janeiro</option><option value="02">Fevereiro</option><option value="03">Março</option>
