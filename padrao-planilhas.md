@@ -306,7 +306,7 @@ ano quebraria a lógica.
 
 | Coluna | Tipo |
 |---|---|
-| `nome_funcionario` | texto |
+| `nome_servidor` | texto |
 | `cargo` | texto |
 | `lotacao` | texto |
 | `data_admissao` | data |
@@ -322,8 +322,10 @@ assim que resolvidos.
 
 - **remuneracao_detalhada_servidores** — 4 colunas da planilha de origem
   (13–16) ainda não mapeadas para o dicionário da seção 6.
-- **servidores** — a planilha de origem tem uma 7ª coluna vazia, sem
-  cabeçalho, a remover.
+- **servidores** — a cópia local (`planilhas/originais/servidores.xlsx`,
+  repo de staging) já teve a 7ª coluna vazia removida (03/09/2026). A
+  planilha real do Google Sheets ainda não — remover a coluna G lá também
+  na próxima vez que for editada.
 
 ---
 
