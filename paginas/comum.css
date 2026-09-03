@@ -70,6 +70,9 @@ button.btn-filtro:hover { background: #00274d; }
 /* Linha fixa de 2 colunas iguais, mesmo nos breakpoints de tela média (ex.: nome + período) */
 .painel-filtros.painel-filtros--duplo { grid-template-columns: repeat(2, 1fr); }
 
+/* Linha fixa de 4 colunas iguais, mesmo em telas médias (ex.: situação/mês/ano/botão) */
+.painel-filtros.painel-filtros--quatro { grid-template-columns: repeat(4, 1fr); }
+
 /* --------------------------------------------------------------------
    5. BARRA DE EXPORTAÇÃO
    Em telas estreitas os botões deslizam horizontalmente (scroll suave)
@@ -159,6 +162,7 @@ table.dataTable { border: none !important; margin-top: 5px !important; width: 10
     .painel-filtros { grid-template-columns: 1fr; }
     .painel-filtros .span-2 { grid-column: span 1; }
     .painel-filtros.painel-filtros--duplo { grid-template-columns: 1fr; }
+    .painel-filtros.painel-filtros--quatro { grid-template-columns: 1fr; }
 }
 
 /* --------------------------------------------------------------------
