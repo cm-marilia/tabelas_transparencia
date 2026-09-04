@@ -269,7 +269,19 @@ ano quebraria a lógica.
 | `municipio` | texto |
 | `data_conclusao` | data, pode ser vazio |
 
-### painel_orcamentario — dividir por: `ano`
+### painel_orcamentario — aba única (`Página1`)
+
+⚠️ **Duas exceções ao padrão geral, ambas propositais:**
+> 1. **Não tem carimbo.** A planilha é alimentada manualmente uma vez por
+>    mês, sem Apps Script. Os **cabeçalhos ficam na linha 1** e os dados
+>    começam na **linha 2**; o selo verde do painel exibe o texto fixo
+>    "Atualizado mensalmente". Mesma exceção da
+>    `remuneracao_detalhada_servidores`.
+> 2. **Não é dividida por ano**, embora tenha coluna `ano`. O dashboard
+>    compara anos entre si (série histórica desde 2017) e o volume é
+>    pequeno — 12 linhas por ano, 120 no total. Dividir obrigaria a
+>    baixar todas as abas a cada carregamento, o contrário do que a
+>    divisão pretende.
 
 | Coluna | Tipo |
 |---|---|
@@ -280,7 +292,12 @@ ano quebraria a lógica.
 | `valor_empenhado` | número |
 | `valor_liquidado` | número |
 | `valor_pago` | número |
-| `resultado` | número |
+| `resultado` | número, `duodecimo_repassado - valor_empenhado` |
+
+`resultado` era uma fórmula (`=D3-E3`) na planilha de origem; gravar o
+valor calculado, não a fórmula. Meses futuros do ano corrente ficam com
+`0` nos valores realizados e o `duodecimo_previsto` já preenchido — a
+página cuida de não mostrá-los no zoom inicial.
 
 ### remuneracao_detalhada_servidores — dividir por: `ano`
 

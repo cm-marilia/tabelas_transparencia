@@ -1,0 +1,162 @@
+<!-- ===========================================================================
+     SEÇÃO "PAINEL ORÇAMENTÁRIO" — SITE OFICIAL
+     Câmara Municipal de Marília | https://www.marilia.sp.leg.br/
+
+     O QUE É ESTE CÓDIGO
+     Guia educativo sobre o duodécimo e as três fases da despesa pública
+     (empenho, liquidação e pagamento) + iframe que incorpora o dashboard
+     hospedado no GitHub Pages + script que ajusta a altura do iframe.
+
+     ⚠️ IMPORTANTE: todos os estilos são INLINE de propósito — o editor do
+     site remove blocos <style> ao salvar. Não converta para classes/<style>.
+     Cole apenas este fragmento no editor (sem <!DOCTYPE>, <html>, <head>
+     ou <body> — o site já fornece essa estrutura).
+
+     MANUTENÇÃO RÁPIDA
+     - Endereço do painel ........ src do iframe:
+       https://cm-marilia.github.io/tabelas_transparencia/paginas/painel_orcamentario.html
+       (repo cm-marilia/tabelas_transparencia, pasta paginas/)
+     =========================================================================== -->
+
+<section class="conteudo-transparencia" style="text-align: justify;">
+
+    <h3>🏛️ Gestão dos Recursos Públicos</h3>
+
+    <p>
+        Com foco na transparência e no respeito ao dinheiro público, a Câmara Municipal de Marília apresenta seu painel orçamentário interativo. Para facilitar o acompanhamento cidadão, preparamos este guia prático que explica como os recursos chegam ao Legislativo e a execução da despesa pública.
+    </p>
+
+    <p>
+        O painel encontra-se ao final deste conteúdo. Para ir até lá, basta
+        <a href="#painel_orcamentario">clicar neste link</a>.
+    </p>
+
+    <hr>
+
+    <h3>💰 O que é o Duodécimo?</h3>
+
+    <p>
+        O Duodécimo é o repasse financeiro obrigatório que o Poder Executivo (Prefeitura) faz ao Poder Legislativo (Câmara Municipal) para o seu custeio e funcionamento.
+    </p>
+
+    <p>
+        O termo "duodécimo" significa "a décima segunda parte". Funciona da seguinte forma: o orçamento anual da Câmara é aprovado no ano anterior. Esse valor total é dividido por doze, e a Prefeitura realiza a transferência dessa fração mensalmente para a conta do Legislativo.
+    </p>
+
+    <p>
+        Esse mecanismo é uma garantia prevista na Constituição Federal (Art. 168) para assegurar a independência e a harmonia entre os poderes. Com o duodécimo, a Câmara Municipal de Marília tem autonomia financeira para honrar seus compromissos, como folha de pagamento, manutenção do prédio, contratos de tecnologia e demais serviços essenciais para o trabalho dos vereadores e o atendimento à população.
+    </p>
+
+    <p>
+        O duodécimo é a única fonte de receita do Poder Legislativo Municipal de Marília. Em nosso painel, identificamos o duodécimo como receita (prevista e recebida).
+    </p>
+
+    <hr>
+
+    <h3>💳 As Três Fases da Despesa Pública</h3>
+
+    <p>
+        Quando a Câmara Municipal precisa adquirir um bem ou contratar um serviço, o dinheiro não é gasto de forma imediata. A Lei nº 4.320/1964, que institui as normas gerais de direito financeiro no Brasil, exige um rito de controle rigoroso dividido em três etapas obrigatórias: Empenho, Liquidação e Pagamento.
+    </p>
+
+    <div style="margin-left: 30px;">
+
+        <strong>📝 1. Empenho (A Reserva de Valor)</strong>
+
+        <p>
+            O empenho é o primeiro passo da despesa. Quando um processo de compra ou licitação é concluído e o contrato é assinado, o Poder Público emite uma "Nota de Empenho". Esse documento cria uma obrigação com o fornecedor e subtrai aquele valor do saldo do orçamento.
+        </p>
+
+        <p>
+            Na prática, o dinheiro ainda não saiu da conta da Câmara, mas fica "reservado" ou "carimbado" exclusivamente para aquela finalidade, garantindo ao prestador do serviço que os recursos para pagá-lo já estão separados.
+        </p>
+
+        <strong>🔎 2. Liquidação (A Conferência)</strong>
+
+        <p>
+            A liquidação é a fase de verificação. É o momento em que a Câmara atesta que o fornecedor efetivamente entregou o produto ou prestou o serviço com a qualidade e as especificações exigidas no contrato.
+        </p>
+
+        <p>
+            Um servidor responsável recebe a nota fiscal e atesta o recebimento. Somente após essa confirmação oficial o Poder Público reconhece que a dívida é real e o fornecedor adquire o direito de receber o valor.
+        </p>
+
+        <strong>💸 3. Pagamento (A Quitação)</strong>
+
+        <p>
+            A última etapa é o pagamento em si. Após o ateste da liquidação, a tesouraria da Câmara autoriza a emissão da ordem bancária.
+        </p>
+
+        <p>
+            O dinheiro é efetivamente transferido dos cofres públicos para a conta do credor (fornecedor, prestador de serviço ou servidor). É neste momento que a obrigação financeira do Estado é extinta.
+        </p>
+
+    </div>
+
+    <hr>
+
+    <h3>🤝 Compromisso com a Transparência</h3>
+
+    <p>
+        Compreender esses conceitos é fundamental para que todo cidadão mariliense possa exercer o controle social de forma ativa.
+    </p>
+
+    <p>
+        Ao observar que um valor foi "empenhado", sabe-se que há um planejamento e uma reserva em andamento; ao ver que foi "pago", tem-se a certeza da conclusão do processo e do serviço entregue à instituição.
+    </p>
+
+    <p>
+        A Câmara Municipal de Marília reforça seu compromisso com a clareza dos dados e convida toda a população a acompanhar regularmente nossos canais de prestação de contas.
+    </p>
+
+</section>
+
+<hr>
+
+<!-- O link-âncora "clicar neste link" (no topo da página) aponta para cá -->
+<h3 id="painel_orcamentario" style="scroll-margin-top: 20px;">📊 Painel Orçamentário</h3>
+
+<!-- ========================================================================
+     IFRAME — dashboard hospedado no GitHub Pages
+     A altura inicial (950px) vale só até a primeira mensagem do painel;
+     depois disso o script abaixo ajusta a altura automaticamente.
+
+     ⚠️ O endereço aponta para o repositório NOVO (tabelas_transparencia,
+     pasta paginas/). Até 04/09/2026 apontava para "cm-marilia.github.io/
+     website/", o repositório antigo que está sendo abandonado — de onde
+     vinha uma versão desatualizada da página.
+
+     Sem "scrolling=no" de propósito: se a mensagem de altura não chegar
+     (erro de script no painel, bloqueio de rede), o iframe rola
+     internamente e nada é cortado. Com o atributo, o quadro ficaria preso
+     nos 950px e o fim do gráfico ficaria inacessível. Quando o ajuste
+     funciona, a altura fica exata e não há rolagem.
+     ======================================================================== -->
+<iframe
+    id="iframe-painel_orcamentario"
+    src="https://cm-marilia.github.io/tabelas_transparencia/paginas/painel_orcamentario.html"
+    loading="lazy"
+    style="border: none; width: 1px; min-width: 100%; height: 950px; transition: height 0.3s ease-in-out;"
+    title="Painel Orçamentário - Câmara Municipal de Marília">
+</iframe>
+
+<!-- ========================================================================
+     SCRIPT — ajuste automático de altura do iframe
+     Proteções: só aceita mensagens do GitHub Pages oficial (event.origin),
+     vindas DESTE iframe (event.source), com altura numérica válida.
+     ======================================================================== -->
+<script>
+    window.addEventListener('message', function(event) {
+        if (event.origin !== "https://cm-marilia.github.io") return;
+
+        var iframe = document.getElementById('iframe-painel_orcamentario');
+        if (!iframe || event.source !== iframe.contentWindow) return;
+
+        if (event.data && event.data.tipo === 'ajustarAltura') {
+            var altura = parseInt(event.data.valor, 10);
+            if (!isNaN(altura) && altura > 200) {
+                iframe.style.height = altura + 'px';
+            }
+        }
+    }, false);
+</script>
