@@ -57,8 +57,9 @@
         .filtros-remuneracao .col-2-3 { grid-column: span 4; }
         .filtros-remuneracao .col-1-3 { grid-column: span 2; }
 
-        /* Telas médias e celular: um controle por linha. */
-        @media (max-width: 1024px) {
+        /* As duas proporções cabem bem até ~768px — abaixo disso (celular)
+           empilha um controle por linha, como o comum.css faz nas demais. */
+        @media (max-width: 768px) {
             .painel-filtros.filtros-remuneracao { grid-template-columns: 1fr; }
             .filtros-remuneracao .col-2-3,
             .filtros-remuneracao .col-1-3 { grid-column: span 1; }
