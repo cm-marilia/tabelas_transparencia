@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<!-- ===========================================================================
+     REMUNERAÇÃO DETALHADA DOS SERVIDORES — Câmara Municipal de Marília
+     ===========================================================================
+     Exibe a remuneração mensal dos servidores em cards, com busca por nome,
+     filtros por cargo, mês e ano, exportação (CSV/Excel/JSON/XML) e impressão.
+     Hospedada no GitHub Pages e incorporada via <iframe> no site oficial
+     (marilia.sp.leg.br).
+
+     Os dados vêm de uma planilha do Google Sheets dividida por ano, publicada
+     como CSV (ver FONTES_POR_ANO, logo no início do <script> abaixo — é o que
+     você mexe ao abrir a aba de um ano novo). O filtro "Ano" decide qual aba
+     é baixada; "Mês", "Nome" e "Cargo" filtram em memória.
+
+     Como adicionar um ano novo: ver COMO-ADICIONAR-UM-ANO.md no repositório.
+
+     ATENÇÃO — esta planilha NÃO tem carimbo de atualização: ela é alimentada
+     manualmente uma vez por mês, então o selo exibe "Atualizado mensalmente"
+     em vez de uma data. Os cabeçalhos ficam na LINHA 1 (não na 2) e os dados
+     começam na linha 2. É a única exceção ao padrao-planilhas.md.
+
+     Os rótulos visíveis das verbas foram definidos pela diretoria e devem ser
+     mantidos exatamente como estão (ROTULOS, abaixo) — não abreviar, não
+     renomear.
+
+     Estilo e funções compartilhadas com as outras páginas: comum.css e
+     comum.js. Formato esperado da planilha: padrao-planilhas.md.
+     =========================================================================== -->
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Remuneração Detalhada dos Servidores</title>
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="comum.css" />
+
+    <style>
+        /* O chrome (topo, painéis, loader, paginação, selo) vem de comum.css.
+           Aqui só o essencial específico da remuneração. */
+
+        .subtitulo-card { font-size: 12px; color: #64748b; font-weight: 500; text-transform: uppercase; }
+
+        /* Grade das verbas: 4 colunas no desktop, 2 no tablet, 1 no celular. */
+        .grade-verbas {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px 14px;
+        }
+        @media (max-width: 900px) { .grade-verbas { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 520px) { .grade-verbas { grid-template-columns: 1fr; } }
+
+        /* Vencimentos brutos e líquidos: destacados do resto das verbas. */
+        .verba-destaque .info-valor { color: #003b75; font-weight: 700; }
+        .valor-liquido { font-size: 15px; font-weight: 700; color: #003b75; white-space: nowrap; }
+    </style>
+</head>
+<body>
+
+<div id="wrapper">
+
+    <header class="topo">
+        <h1>Remuneração Detalhada dos Servidores</h1>
+        <div class="logo-container">
+            <img src="../brasao_marilia.png" alt="Brasão de Marília" width="50" height="50" class="brasao">
+            <span class="texto-camara">Câmara Municipal de Marília</span>
+        </div>
+    </header>
+
+    <div id="cabecalho-impressao">
+        <img src="../brasao_marilia.png" width="63" height="70" alt="Brasão de Marília">
+        <div>
+            <h1 style="margin:0; color:#003b75;">Remuneração Detalhada dos Servidores</h1>
+            <p style="margin:0; font-weight:bold;">Câmara Municipal de Marília</p>
+        </div>
+    </div>
+
+    <div id="loader" role="status" aria-live="polite">
+        <div class="spinner"></div>
+        <span>Carregando base de dados...</span>
+    </div>
+
+    <main id="main-container" style="display:none;">
+
+        <fieldset class="painel-grupo">
+            <legend class="titulo-painel titulo-painel--com-selo">
+                Filtros de Pesquisa
+                <span id="badge-atualizacao" class="badge-atualizacao">⏳ Sincronizando...</span>
+            </legend>
+
+            <div class="painel-filtros" style="margin-bottom: 10px;">
+                <input type="text" id="filtroNome" placeholder="Pesquisar por nome..." autocomplete="off" aria-label="Pesquisar por nome">
+                <select id="filtroCargo" aria-label="Filtrar por cargo"><option value="">Cargo</option></select>
+            </div>
+
+            <div class="painel-filtros">
+                <select id="filtroMes" aria-label="Filtrar por mês"><option value="">Mês</option></select>
+                <select id="filtroAno" aria-label="Filtrar por ano"></select>
+                <button class="btn-filtro" onclick="limparFiltros()">Limpar filtros</button>
+            </div>
+        </fieldset>
+
+        <fieldset class="painel-grupo">
+            <legend class="titulo-painel">Exportação e Impressão</legend>
+            <div class="painel-exportacao">
+                <button onclick="exportarCSV()">⬇️ CSV</button>
+                <button onclick="exportarXLSX()">⬇️ Excel</button>
+                <button onclick="exportarJSON()">⬇️ JSON</button>
+                <button onclick="exportarXML()">⬇️ XML</button>
+                <button class="btn-acao" onclick="imprimirSeguro()">🖨️ Imprimir</button>
+            </div>
+        </fieldset>
+
+        <fieldset class="painel-grupo" id="painel-visualizacao" style="padding: 10px 15px;">
+            <legend class="titulo-painel">Visualização</legend>
+            <div class="dt-custom-header">
+                <div id="comprimento-tabela"></div>
+                <div id="contagem-registros" class="badge-contagem">0 registros encontrados</div>
+            </div>
+        </fieldset>
+
+        <table id="tabela" style="width:100%" role="presentation">
+            <thead><tr><th>Dados</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </main>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+<script>window.ORIGEM_PAI = "https://www.marilia.sp.leg.br";</script>
+<script src="comum.js"></script>
+
+<script>
+    /* removerAcentos, escapeHtml, escapeXml, parseNumeroBR, formatarBRL,
+       buscarCSV, indexarColunas, enviarAlturaIframe e o objeto Exportar
+       vêm de comum.js. */
+
+    // ==== CONFIGURAÇÃO =====================================================
+
+    // Uma aba (e uma URL publicada) por ano. Ao abrir a aba de um ano novo,
+    // acrescentar a linha aqui — ver COMO-ADICIONAR-UM-ANO.md.
+    const FONTES_POR_ANO = {
+        "2026": "COLAR_AQUI_A_URL_CSV_DA_ABA_2026"
+    };
+
+    // Campo interno → nome da coluna na planilha, por NOME (não posição).
+    const COL = {
+        ano:            ["ano"],
+        mes:            ["mes"],
+        matricula:      ["matricula"],
+        nome:           ["nome"],
+        brutos:         ["vencimentos_brutos"],
+        referencia:     ["referencia"],
+        vantagens:      ["vantagens_pessoais"],
+        outras_verbas:  ["outras_verbas_remuneratorias_legais_ou_judiciais"],
+        indenizatorias: ["verbas_indenizatorias_e_ou_eventuais"],
+        auxilio:        ["auxilio_saude_alimentacao"],
+        abono:          ["abono_de_permanencia"],
+        redutor:        ["redutor"],
+        desc_legais:    ["descontos_legais"],
+        desc_eventuais: ["descontos_eventuais"],
+        liquidos:       ["vencimentos_liquidos"],
+        cargo:          ["cargo"],
+    };
+
+    /* Rótulos visíveis — definidos pela diretoria. NÃO abreviar nem renomear.
+       Valem para os cards, para a exportação e para a impressão. */
+    const ROTULOS = {
+        ano:            "Ano",
+        mes:            "Mês",
+        matricula:      "Matrícula",
+        nome:           "Nome",
+        brutos:         "Vencimentos Brutos",
+        referencia:     "Referência",
+        vantagens:      "Vantagens Pessoais",
+        outras_verbas:  "Outras Verbas Remuneratórias Legais ou Judiciais",
+        indenizatorias: "Verbas Indenizatórias e/ou Eventuais",
+        auxilio:        "Auxílio Saúde / Alimentação",
+        abono:          "Abono de Permanência",
+        redutor:        "Redutor",
+        desc_legais:    "Descontos Legais",
+        desc_eventuais: "Descontos Eventuais",
+        liquidos:       "Vencimentos Líquidos",
+        cargo:          "Cargo",
+    };
+
+    // Campos monetários, na ordem em que aparecem no card e na exportação.
+    const VERBAS = ["brutos", "referencia", "vantagens", "outras_verbas",
+                    "indenizatorias", "auxilio", "abono", "redutor",
+                    "desc_legais", "desc_eventuais", "liquidos"];
+
+    // Meses por extenso, na ordem do calendário (a planilha grava o nome).
+    const MESES = ["janeiro", "fevereiro", "marco", "abril", "maio", "junho",
+                   "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+
+    const ordemMes = (m) => MESES.indexOf(removerAcentos(String(m || "").toLowerCase()));
+
+    // ==== ESTADO GLOBAL =====================================================
+    let tabela;
+    let dadosGlobais = [];
+
+    // ==== CARREGAMENTO =======================================================
+
+    /* Sem carimbo: os cabeçalhos ficam na linha 1. A busca abaixo ainda varre
+       as 5 primeiras linhas por segurança, caso a planilha ganhe um carimbo
+       algum dia. */
+    function processarCSV(text, anoFonte) {
+        const linhas = Papa.parse(String(text).trim()).data;
+
+        let ic = 0;
+        for (let i = 0; i < Math.min(5, linhas.length); i++) {
+            const t = removerAcentos(linhas[i].join(" ").toLowerCase());
+            if (t.includes("vencimentos_brutos")) { ic = i; break; }
+        }
+
+        const idx = indexarColunas(linhas[ic]);
+        const posicao = {};
+        Object.keys(COL).forEach(campo => {
+            const nome = COL[campo].find(n => n in idx);
+            if (nome != null) posicao[campo] = idx[nome];
+        });
+
+        if (!("nome" in posicao) || !("brutos" in posicao)) {
+            throw new Error('A planilha não tem as colunas esperadas "nome" e "vencimentos_brutos".');
+        }
+
+        const pegar = (cols, campo) => {
+            const i = posicao[campo];
+            return (i != null && cols[i] != null) ? String(cols[i]).trim() : "";
+        };
+
+        return linhas.slice(ic + 1).map(cols => {
+            const o = {
+                ano:       pegar(cols, "ano") || anoFonte,
+                mes:       pegar(cols, "mes"),
+                matricula: pegar(cols, "matricula"),
+                nome:      pegar(cols, "nome"),
+                cargo:     pegar(cols, "cargo"),
+            };
+            // Célula vazia ou "R$ -" na planilha significa zero, não "sem dado".
+            VERBAS.forEach(v => {
+                const n = parseNumeroBR(pegar(cols, v));
+                o[v] = isNaN(n) ? 0 : n;
+            });
+            o.busca_nome = removerAcentos((o.nome || "").toLowerCase());
+            return o;
+        }).filter(d => d.nome && removerAcentos(d.nome.toLowerCase()) !== "nome");
+    }
+
+    async function carregarDados() {
+        $('#loader').show(); $('#main-container').hide();
+        try {
+            const anos = Object.keys(FONTES_POR_ANO).sort((a, b) => Number(b) - Number(a));
+            if (!anos.length) throw new Error("Nenhuma aba de ano configurada em FONTES_POR_ANO.");
+
+            let ano = $('#filtroAno').val();
+            if (!ano || !anos.includes(ano)) ano = anos[0];
+
+            dadosGlobais = processarCSV(await buscarCSV(FONTES_POR_ANO[ano]), ano);
+
+            if (dadosGlobais.length === 0) {
+                throw new Error("A planilha foi lida, mas não retornou nenhum registro.");
+            }
+
+            popularFiltrosDynamic(anos, ano);
+            aplicarFiltros();
+            // Planilha sem carimbo: alimentada manualmente uma vez por mês.
+            $('#badge-atualizacao').text("🟢 Atualizado mensalmente");
+            $('#loader').hide();
+            $('#main-container').fadeIn(400, () => enviarAlturaIframe());
+        } catch (e) {
+            console.error("Erro ao carregar os dados: ", e);
+            $('#loader').html(`<b style="color:#b91c1c">Não foi possível carregar os dados.<br>${escapeHtml(e.message)}<br><br>Tente recarregar a página.</b>`);
+        }
+    }
+
+    // ==== FILTROS ============================================================
+
+    /* Ano vem de FONTES_POR_ANO (cada ano é uma aba publicada à parte). Cargo
+       e Mês vêm dos dados do ano carregado. */
+    function popularFiltrosDynamic(anos, anoAtual) {
+        $('#filtroAno').html('');
+        anos.forEach(a => $('#filtroAno').append(new Option(a, a)));
+        $('#filtroAno').val(anoAtual);
+
+        const cargoSel = $('#filtroCargo').val();
+        const cargos = [...new Set(dadosGlobais.map(d => d.cargo))].filter(Boolean).sort();
+        $('#filtroCargo').html('<option value="">Cargo</option>');
+        cargos.forEach(c => $('#filtroCargo').append(new Option(c, c)));
+        if (cargos.includes(cargoSel)) $('#filtroCargo').val(cargoSel);
+
+        const mesSel = $('#filtroMes').val();
+        const meses = [...new Set(dadosGlobais.map(d => d.mes))].filter(Boolean)
+            .sort((a, b) => ordemMes(a) - ordemMes(b));
+        $('#filtroMes').html('<option value="">Mês</option>');
+        meses.forEach(m => $('#filtroMes').append(new Option(m.charAt(0).toUpperCase() + m.slice(1), m)));
+        if (meses.includes(mesSel)) $('#filtroMes').val(mesSel);
+    }
+
+    /* Ordenação: mês mais recente primeiro; dentro do mês, ordem alfabética. */
+    function aplicarFiltros() {
+        const txt = removerAcentos($('#filtroNome').val().toLowerCase());
+        const cargo = $('#filtroCargo').val();
+        const mes = $('#filtroMes').val();
+
+        const res = dadosGlobais.filter(d =>
+            (!txt || d.busca_nome.includes(txt)) &&
+            (!cargo || d.cargo === cargo) &&
+            (!mes || d.mes === mes)
+        );
+
+        res.sort((a, b) => {
+            const dm = ordemMes(b.mes) - ordemMes(a.mes);
+            if (dm !== 0) return dm;
+            return (a.nome || "").localeCompare(b.nome || "");
+        });
+
+        renderizarTabela(res);
+    }
+
+    function limparFiltros() {
+        $('#filtroNome').val('');
+        $('#filtroCargo').val('');
+        $('#filtroMes').val('');
+        aplicarFiltros();
+    }
+
+    // ==== TABELA DE CARDS ====================================================
+
+    function inicializarTabela() {
+        tabela = $('#tabela').DataTable({
+            data: [],
+            pageLength: 10,
+            ordering: false,
+            language: { url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json', lengthMenu: "Exibir _MENU_ resultados", emptyTable: "Nenhum registro encontrado." },
+            dom: 'lrt<"dt-bottom-controls"ip>',
+            columns: [{
+                data: null,
+                render: function (d) {
+                    const celula = (campo) => {
+                        const destaque = (campo === "brutos" || campo === "liquidos") ? " verba-destaque" : "";
+                        return `<div class="info-col${destaque}">
+                                    <span class="info-label">${escapeHtml(ROTULOS[campo])}</span>
+                                    <span class="info-valor">${escapeHtml(formatarBRL(d[campo]))}</span>
+                                </div>`;
+                    };
+                    const mes = String(d.mes || "");
+                    const competencia = `${escapeHtml(mes.charAt(0).toUpperCase() + mes.slice(1))}/${escapeHtml(d.ano)}`;
+                    return `
+                        <div class="card-info">
+                            <div class="card-header">
+                                <div class="card-header-texto">
+                                    <span class="nome-principal">${escapeHtml(d.nome)}</span>
+                                    <span class="subtitulo-card">${escapeHtml(d.cargo || "—")} · ${ROTULOS.matricula} ${escapeHtml(d.matricula || "—")} · ${competencia}</span>
+                                </div>
+                                <span class="valor-liquido">${escapeHtml(formatarBRL(d.liquidos))}</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="grade-verbas">${VERBAS.map(celula).join('')}</div>
+                            </div>
+                        </div>`;
+                }
+            }],
+            initComplete: function () { $('.dataTables_length').appendTo('#comprimento-tabela'); },
+            drawCallback: function () {
+                $('#contagem-registros').html(`<b>${this.api().rows().count()}</b> registros encontrados`);
+                enviarAlturaIframe();
+            }
+        });
+
+        tabela.on('page.dt', function () {
+            setTimeout(() => document.getElementById('painel-visualizacao').scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+        });
+    }
+
+    function renderizarTabela(dados) {
+        if (!tabela) inicializarTabela();
+        tabela.clear();
+        tabela.rows.add(dados);
+        tabela.draw();
+    }
+
+    // ==== EXPORTAÇÕES (implementação em comum.js, objeto Exportar) =========
+
+    /* Cabeçalhos da exportação = os mesmos rótulos da diretoria. */
+    function dadosParaExportar() {
+        return tabela.rows().data().toArray().map(d => {
+            const linha = {
+                [ROTULOS.ano]:       d.ano || '',
+                [ROTULOS.mes]:       d.mes || '',
+                [ROTULOS.matricula]: d.matricula || '',
+                [ROTULOS.nome]:      d.nome || '',
+                [ROTULOS.cargo]:     d.cargo || '',
+            };
+            VERBAS.forEach(v => { linha[ROTULOS[v]] = d[v]; });
+            return linha;
+        });
+    }
+
+    function gerarNomeArquivoBase() {
+        let partes = ["remuneracao_detalhada_servidores"];
+        const nome = $('#filtroNome').val().trim();
+        if (nome) partes.push(nome.replace(/\s+/g, '_'));
+        if ($('#filtroCargo').val()) partes.push($('#filtroCargo').val().replace(/\s+/g, '_'));
+        if ($('#filtroMes').val()) partes.push($('#filtroMes').val());
+        if ($('#filtroAno').val()) partes.push($('#filtroAno').val());
+        return removerAcentos(partes.join('_')).replace(/[^a-zA-Z0-9_]/g, '').toLowerCase();
+    }
+
+    function exportarCSV()  { Exportar.csv(dadosParaExportar(), gerarNomeArquivoBase()); }
+    function exportarXLSX() { Exportar.xlsx(dadosParaExportar(), gerarNomeArquivoBase(), "Remuneração"); }
+    function exportarJSON() { Exportar.json(dadosParaExportar(), gerarNomeArquivoBase()); }
+    function exportarXML()  { Exportar.xml(dadosParaExportar(), gerarNomeArquivoBase(), { raiz: "remuneracoes", item: "remuneracao" }); }
+
+    // ==== IMPRESSÃO ==========================================================
+
+    function imprimirSeguro() {
+        if (!tabela) return;
+        const len = tabela.page.len();
+        tabela.one('draw.dt', function () {
+            setTimeout(() => { window.print(); tabela.page.len(len).draw('page'); }, 100);
+        });
+        tabela.page.len(-1).draw('page');
+    }
+
+    // ==== INICIALIZAÇÃO ======================================================
+    $(document).ready(function () {
+        let debounce;
+        $('#filtroNome').on('input', function () {
+            clearTimeout(debounce);
+            debounce = setTimeout(aplicarFiltros, 250);
+        });
+        $('#filtroCargo, #filtroMes').on('change', aplicarFiltros);
+        // Trocar de ano troca a aba baixada — recarrega do Sheets.
+        $('#filtroAno').on('change', carregarDados);
+        carregarDados();
+    });
+</script>
+</body>
+</html>

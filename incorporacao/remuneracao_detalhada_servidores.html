@@ -1,0 +1,73 @@
+<!-- ===========================================================================
+     SEÇÃO "REMUNERAÇÃO DETALHADA DOS SERVIDORES" — SITE OFICIAL
+     Câmara Municipal de Marília | https://www.marilia.sp.leg.br/
+
+     O QUE É ESTE CÓDIGO
+     Texto explicativo sobre a remuneração dos servidores + iframe que
+     incorpora o painel hospedado no GitHub Pages + script que ajusta a
+     altura do iframe automaticamente.
+
+     ⚠️ IMPORTANTE: todos os estilos são INLINE de propósito — o editor do
+     site remove blocos <style> ao salvar. Não converta para classes/<style>.
+     Cole apenas este fragmento no editor (sem <!DOCTYPE>, <html>, <head>
+     ou <body> — o site já fornece essa estrutura).
+
+     MANUTENÇÃO RÁPIDA
+     - Endereço do painel ........ src do iframe:
+       https://cm-marilia.github.io/tabelas_transparencia/paginas/remuneracao_detalhada_servidores.html
+       (repo cm-marilia/tabelas_transparencia, pasta paginas/)
+     =========================================================================== -->
+
+<section class="manual-remuneracao-detalhada-servidores" style="margin-top: 20px;">
+
+    <p style="text-align: justify;">
+        A remuneração detalhada dos servidores é uma ferramenta de transparência pública que abre, mês a mês, a composição integral do que é pago a cada servidor vinculado à Câmara Municipal de Marília. Para cada competência são discriminados os Vencimentos Brutos, a Referência, as Vantagens Pessoais, as Outras Verbas Remuneratórias Legais ou Judiciais, as Verbas Indenizatórias e/ou Eventuais, o Auxílio Saúde / Alimentação, o Abono de Permanência, o Redutor, os Descontos Legais, os Descontos Eventuais e os Vencimentos Líquidos, permitindo que o cidadão acompanhe não apenas o valor final recebido, mas cada parcela que o compõe. Os dados são atualizados mensalmente.
+    </p>
+
+    <hr />
+
+    <h3 style="text-align: justify;">🔎 Filtros e Exportação</h3>
+
+    <p style="text-align: justify;">
+        O painel permite pesquisar por nome e aplicar filtros combinados por cargo, mês e ano, além de exibir o total de registros encontrados. O sistema também oferece recursos para imprimir os resultados de forma otimizada ou exportar os dados filtrados em formatos estruturados, como CSV, Excel, JSON e XML, facilitando a auditoria e o controle externo.
+    </p>
+
+</section>
+
+<!-- ====================================================================
+     IFRAME — painel de consulta hospedado no GitHub Pages
+     A altura inicial (800px) vale só até a primeira mensagem do painel;
+     depois disso o script abaixo ajusta a altura automaticamente ao
+     conteúdo. Sem "scrolling=no": se a mensagem de altura não chegar
+     (erro de script no painel, bloqueio de rede), o iframe rola
+     internamente e nada é cortado. Quando o ajuste funciona, a altura
+     fica exata e não há rolagem.
+     ==================================================================== -->
+<iframe
+    id="iframe-remuneracao-detalhada-servidores"
+    src="https://cm-marilia.github.io/tabelas_transparencia/paginas/remuneracao_detalhada_servidores.html"
+    loading="lazy"
+    style="border: none; width: 1px; min-width: 100%; height: 800px; transition: height 0.3s ease-in-out;"
+    title="Consulta de Remuneração Detalhada dos Servidores - Câmara Municipal de Marília">
+</iframe>
+
+<!-- ====================================================================
+     SCRIPT — ajuste automático de altura do iframe
+     Proteções: só aceita mensagens do GitHub Pages oficial (event.origin),
+     vindas DESTE iframe (event.source), com altura numérica válida.
+     ==================================================================== -->
+<script>
+    window.addEventListener('message', function (event) {
+        if (event.origin !== 'https://cm-marilia.github.io') return;
+
+        var iframe = document.getElementById('iframe-remuneracao-detalhada-servidores');
+        if (!iframe || event.source !== iframe.contentWindow) return;
+
+        if (event.data && event.data.tipo === 'ajustarAltura') {
+            var altura = parseInt(event.data.valor, 10);
+            if (!isNaN(altura) && altura > 200) {
+                iframe.style.height = altura + 'px';
+            }
+        }
+    }, false);
+</script>

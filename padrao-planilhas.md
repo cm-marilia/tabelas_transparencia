@@ -284,23 +284,40 @@ ano quebraria a lógica.
 
 ### remuneracao_detalhada_servidores — dividir por: `ano`
 
-| Coluna | Tipo |
-|---|---|
-| `ano` | texto |
-| `mes` | texto |
-| `matricula` | texto |
-| `nome_servidor` | texto |
-| `vencimentos_brutos` | número |
-| `referencia` | texto |
-| `vantagens_pessoais` | número |
-| `outras_verbas_remuneratorias_legais_judiciais` | número |
-| `verbas_indenizatorias_eventuais` | número |
-| `auxilio_saude_alimentacao` | número |
-| `abono_permanencia` | número |
-| `redutor` | número |
+⚠️ **Duas exceções ao padrão geral, ambas propositais:**
+> 1. **Não tem carimbo.** A planilha é alimentada manualmente uma vez por
+>    mês, então não há Apps Script nem `DADOS_ATUALIZADOS_EM` em A1. Os
+>    **cabeçalhos ficam na linha 1** e os dados começam na **linha 2**. A
+>    página exibe o selo fixo "Atualizado mensalmente" no lugar da data.
+> 2. **Os rótulos visíveis foram definidos pela diretoria** e não podem ser
+>    abreviados nem renomeados. O nome interno da coluna é o rótulo em
+>    `snake_case`; a página reexibe o rótulo original (constante `ROTULOS`
+>    em `paginas/remuneracao_detalhada_servidores.html`), que é também o
+>    cabeçalho usado nas exportações.
 
-> Planilha de origem tem 16 colunas — as 4 restantes (13–16) ainda não
-> mapeadas, ver pendências.
+| Coluna | Tipo | Rótulo exibido |
+|---|---|---|
+| `ano` | texto | Ano |
+| `mes` | texto | Mês |
+| `matricula` | texto | Matrícula |
+| `nome` | texto | Nome |
+| `vencimentos_brutos` | número | Vencimentos Brutos |
+| `referencia` | número | Referência |
+| `vantagens_pessoais` | número | Vantagens Pessoais |
+| `outras_verbas_remuneratorias_legais_ou_judiciais` | número | Outras Verbas Remuneratórias Legais ou Judiciais |
+| `verbas_indenizatorias_e_ou_eventuais` | número | Verbas Indenizatórias e/ou Eventuais |
+| `auxilio_saude_alimentacao` | número | Auxílio Saúde / Alimentação |
+| `abono_de_permanencia` | número | Abono de Permanência |
+| `redutor` | número | Redutor |
+| `descontos_legais` | número | Descontos Legais |
+| `descontos_eventuais` | número | Descontos Eventuais |
+| `vencimentos_liquidos` | número | Vencimentos Líquidos |
+| `cargo` | texto | Cargo |
+
+`mes` é o nome por extenso em minúsculas (`janeiro` … `dezembro`).
+Toda coluna monetária é número puro — sem `R$`, sem texto. Onde o valor
+é zero, gravar `0` (não `R$ -`, não em branco). Volume esperado: 100 a 130
+linhas por mês, cerca de 1.500 por ano — daí a divisão por ano.
 
 ### servidores — aba única (retrato do quadro atual)
 
@@ -320,8 +337,6 @@ ano quebraria a lógica.
 Itens ainda em aberto, por planilha — mover para o histórico (ou apagar)
 assim que resolvidos.
 
-- **remuneracao_detalhada_servidores** — 4 colunas da planilha de origem
-  (13–16) ainda não mapeadas para o dicionário da seção 6.
 - **servidores** — a cópia local (`planilhas/originais/servidores.xlsx`,
   repo de staging) já teve a 7ª coluna vazia removida (03/09/2026). A
   planilha real do Google Sheets ainda não — remover a coluna G lá também
