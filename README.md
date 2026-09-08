@@ -1,19 +1,49 @@
-<img src="brasao_marilia.png" alt="Brasão de Marília" width="70">
+<h1>
+  <img src="brasao_marilia.png" alt="Brasão de Marília" width="58" align="top">
+  Tabelas de Transparência — Câmara Municipal de Marília
+</h1>
 
-# Tabelas de Transparência — Câmara Municipal de Marília
+Este repositório contém as páginas HTML com dados de transparência da Câmara Municipal de Marília, exigidos pela legislação de transparência e avaliados pelo Programa Nacional de Transparência Pública (PNTP), da ATRICON. Cada uma é uma tabela/painel independente — não formam um portal único, cada uma é incorporada num ponto diferente do site oficial <https://www.marilia.sp.leg.br>.
 
-Páginas HTML com dados de transparência da Câmara Municipal de Marília
-(contratos, diárias, empresas sancionadas, julgamento das contas anuais).
-Cada uma é uma tabela/painel independente — não formam um portal único,
-cada uma é incorporada num ponto diferente do site oficial
-<https://www.marilia.sp.leg.br>.
+Os dados vêm de planilhas do Google Sheets, publicadas como CSV e lidas diretamente pelo HTML — não há backend. A atualização dos dados é feita direto na planilha; a página só exibe.
 
-Os dados vêm de planilhas do **Google Sheets**, publicadas como CSV e lidas
-diretamente pelo HTML — não há backend. A atualização dos dados é feita
-direto na planilha; a página só exibe. Quem grava o carimbo de "atualizado
-em" e mascara CPFs na origem são scripts de um repositório **privado**
-separado (não fica aqui por rodar sobre dados sensíveis das planilhas —
-ver seção [Repositório de scripts](#repositório-de-scripts)).
+---
+
+## Início rápido
+
+| Quero… | Vá para |
+|---|---|
+| mudar o texto ao redor de uma tabela no site oficial | editar o fragmento em [`incorporacao/`](incorporacao/) e colar no editor do site |
+| mudar o comportamento de uma tabela/painel (busca, filtros, colunas) | editar a página em [`paginas/`](paginas/) |
+| publicar a aba de um ano novo | [como-adicionar-um-ano.md](como-adicionar-um-ano.md) |
+| conferir o formato que uma planilha precisa ter | [padrao-planilhas.md](padrao-planilhas.md) |
+| entender o carimbo / a máscara de CPF, ou mexer nos scripts | [repositório privado de scripts](https://github.com/cm-marilia/tabelas_transparencia_scripts) |
+
+Publicar qualquer alteração de código: **commit + push na `main`** → o
+GitHub Pages republica sozinho em poucos minutos (sem build nem deploy). Se
+a mudança foi em `incorporacao/`, colar também o novo conteúdo no editor do
+site oficial — ver [Publicando uma alteração](#publicando-uma-alteração).
+
+---
+
+## As páginas
+
+Todas ficam em `paginas/` e no ar em
+`https://cm-marilia.github.io/tabelas_transparencia/paginas/<arquivo>.html`.
+"Divisão" indica se a planilha de origem tem uma aba por ano ou uma aba só;
+"selo" é o que a página mostra no cabeçalho.
+
+| Página | O que mostra | Divisão | Selo |
+|---|---|---|---|
+| [contratos](paginas/contratos.html) | contratos firmados pela Casa — fornecedor, valor, objeto, vigência, PDF e processo no SAPL | por ano (nº do contrato) | carimbo da planilha |
+| [diarias](paginas/diarias.html) | diárias e adiantamentos de viagem de vereadores e servidores | por ano (data de partida) | carimbo da planilha |
+| [empresas_sancionadas](paginas/empresas_sancionadas.html) | sanções administrativas a contratados — quem está impedido de contratar e por quê | aba única | carimbo da planilha |
+| [estagiarios](paginas/estagiarios.html) | quadro de estágio — admissões, desligamentos, lotação | aba única | carimbo da planilha |
+| [julgamentos_contas_camara](paginas/julgamentos_contas_camara.html) | julgamento anual das contas da Câmara pelo TCE-SP | aba única | carimbo da planilha |
+| [painel_manifestacoes](paginas/painel_manifestacoes.html) | dashboard da Ouvidoria — volume, assunto e canal das manifestações | aba única | sem selo |
+| [painel_orcamentario](paginas/painel_orcamentario.html) | dashboard do duodécimo e da execução da despesa, em série histórica | aba única | "Atualizado mensalmente" |
+| [remuneracao_detalhada_servidores](paginas/remuneracao_detalhada_servidores.html) | composição mês a mês da remuneração de cada servidor | por ano | "Atualizado mensalmente" |
+| [servidores](paginas/servidores.html) | quadro de pessoal atual — cargo, lotação, jornada, admissão | aba única | carimbo da planilha |
 
 ---
 
@@ -23,44 +53,23 @@ ver seção [Repositório de scripts](#repositório-de-scripts)).
 tabelas_transparencia/
 ├── brasao_marilia.png          imagem do brasão, usada pelo README e pelas páginas
 ├── padrao-planilhas.md         formato que cada planilha do Google Sheets precisa ter
-├── COMO-ADICIONAR-UM-ANO.md    passo a passo para publicar a aba de um ano novo
+├── como-adicionar-um-ano.md    passo a passo para publicar a aba de um ano novo
 ├── paginas/              páginas completas, hospedadas no GitHub Pages
-│   ├── comum.css                             estilo compartilhado por todas as páginas
-│   ├── comum.js                              funções compartilhadas (datas, exportação, iframe, etc.)
-│   ├── contratos.html
-│   ├── diarias.html
-│   ├── empresas_sancionadas.html
-│   ├── estagiarios.html
-│   ├── julgamentos_contas_camara.html
-│   ├── painel_manifestacoes.html
-│   ├── painel_orcamentario.html
-│   ├── remuneracao_detalhada_servidores.html
-│   └── servidores.html
+│   ├── comum.css               estilo compartilhado por todas as páginas
+│   ├── comum.js                funções compartilhadas (datas, exportação, iframe, etc.)
+│   └── <assunto>.html          uma página autossuficiente por assunto (ver "As páginas")
 │
 └── incorporacao/         fragmentos de HTML para colar no editor do site oficial
-    ├── contratos.html
-    ├── diarias.html
-    ├── empresas_sancionadas.html
-    ├── estagiarios.html
-    ├── julgamentos_contas_camara.html
-    ├── painel_manifestacoes.html
-    ├── painel_orcamentario.html
-    ├── remuneracao_detalhada_servidores.html
-    └── servidores.html
+    └── <assunto>.html          texto para o cidadão + <iframe> da página correspondente
 ```
 
 ### `paginas/` — o site de verdade
 
-Cada arquivo aqui é uma página HTML completa e autossuficiente. É publicada
-no **GitHub Pages** deste repositório e fica acessível em:
-
-```
-https://cm-marilia.github.io/tabelas_transparencia/paginas/<arquivo>.html
-```
-
-Ela lê o CSV publicado da planilha correspondente, monta a tabela/cards,
-oferece busca, filtros e exportação (CSV/Excel/JSON/XML/impressão). É o
-que efetivamente roda — todo o código funcional vive aqui.
+Cada arquivo aqui é uma página HTML completa e autossuficiente, publicada
+no **GitHub Pages** deste repositório. Ela lê o CSV publicado da planilha
+correspondente, monta a tabela/cards e oferece busca, filtros e exportação
+(CSV/Excel/JSON/XML/impressão). É o que efetivamente roda — todo o código
+funcional vive aqui.
 
 ### `incorporacao/` — o que vai no site oficial
 
@@ -93,12 +102,6 @@ de cada planilha (e o dicionário de colunas completo) está em
 [padrao-planilhas.md](padrao-planilhas.md); cada `.html` também repete um
 resumo no topo do próprio arquivo.
 
-Para publicar a aba de um ano novo (contratos, diárias, ...), ver
-[COMO-ADICIONAR-UM-ANO.md](COMO-ADICIONAR-UM-ANO.md). Para lançar dados a
-partir de PDFs (pareceres de diárias, Portarias de penalidade), há prompts
-prontos: [prompt-lancar-diarias.txt](prompt-lancar-diarias.txt) e
-[prompt-lancar-apenados.txt](prompt-lancar-apenados.txt).
-
 ---
 
 ## Publicando uma alteração
@@ -130,7 +133,12 @@ tem código de exibição e dados já públicos.
 
 ## Selo "dados atualizados em"
 
-As páginas de `paginas/` mostram um selo verde com a data/hora da última
+A maioria das páginas mostra um selo verde com a data/hora da última
 atualização, lido diretamente da célula A1 da planilha (carimbo gravado
 pelos scripts do repositório privado). O selo é sempre a informação mais
 recente disponível — não é preciso mexer neste repositório para ele mudar.
+
+Três páginas fogem disso de propósito (ver as seções das planilhas em
+[padrao-planilhas.md](padrao-planilhas.md)): `painel_orcamentario` e
+`remuneracao_detalhada_servidores` exibem o texto fixo "Atualizado
+mensalmente"; `painel_manifestacoes` não exibe selo nenhum.

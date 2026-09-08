@@ -4,7 +4,7 @@ Documento de referência para quem mantém as planilhas do Google Sheets que
 alimentam as Tabelas de Transparência. Mantê-lo atualizado a cada mudança de
 estrutura.
 
-- **Última revisão:** 02/09/2026
+- **Última revisão:** 08/09/2026
 - **Aplica-se a:** contratos, servidores, diárias, remuneração detalhada,
   estagiários, empresas sancionadas, painel orçamentário, painel de
   manifestações, julgamentos de contas.
@@ -13,16 +13,13 @@ estrutura.
 
 ## 1. Como funciona (resumo)
 
-```
-Google Sheets (você edita)
-   └─ cada aba publicada na web como CSV  (Arquivo → Compartilhar → Publicar na web)
-        └─ página HTML no GitHub Pages baixa o CSV e monta a tabela
-             └─ o site oficial (marilia.sp.leg.br) embute a página num <iframe>
-```
+O fluxo completo (Sheets → CSV → GitHub Pages → `<iframe>` no site oficial)
+e a estrutura do repositório estão no [README.md](README.md).
 
-Cada página HTML tem, no topo do `<script>`, as URLs dos CSVs que ela consome.
-Quando a estrutura de uma planilha muda (nome de aba, cabeçalho, nova aba de
-ano), **a página no ar pode quebrar na hora** — por isso as regras abaixo.
+O essencial para este documento: cada página HTML tem, no topo do
+`<script>`, as URLs dos CSVs que ela consome. Quando a estrutura de uma
+planilha muda (nome de aba, cabeçalho, nova aba de ano), **a página no ar
+pode quebrar na hora** — por isso as regras abaixo.
 
 ---
 
@@ -103,51 +100,25 @@ em aba única — indicado na seção 6.
 
 ## 4. Publicar a aba de um ano novo
 
-Fluxo único, do começo ao fim. "Publicar na web" é **independente** do botão
-*Compartilhar* — a planilha pode continuar **Restrita** (ninguém acessa o
-arquivo em si); só o CSV da aba publicada fica público.
+O procedimento completo — criar a aba, publicar como CSV, colar a URL no
+`FONTES_POR_ANO` do HTML, conferir no ar e despublicar — está em
+**[como-adicionar-um-ano.md](como-adicionar-um-ano.md)**.
 
-1. **Criar a aba** — menu **Transparência → Criar aba do próximo ano** (com
-   o Apps Script instalado). Clona a estrutura da aba mais recente, limpa os
-   dados, põe a aba nova na frente e já grava o carimbo em A1. Conferir só
-   os cabeçalhos da linha 2 (vêm da cópia) e lançar os dados a partir da
-   linha 3.
-2. **Publicar a aba** — `Arquivo → Compartilhar → Publicar na web` → aba
-   **Link** → no 1º seletor, trocar "Documento inteiro" pela aba do ano
-   novo (⚠️ nunca deixar em "Documento inteiro" — expõe todas as abas,
-   inclusive rascunhos) → no 2º seletor, **Valores separados por vírgula
-   (.csv)** → **Publicar** → marcar **"Republicar automaticamente quando
-   alterações forem feitas"** (sem isso o CSV congela na versão publicada).
-3. **Copiar a URL publicada** (formato
-   `https://docs.google.com/spreadsheets/d/e/2PACX-.../pub?gid=NÚMERO&single=true&output=csv`
-   — o `gid` identifica a aba) e colar no objeto `FONTES_POR_ANO`, no topo
-   do `<script>` da página correspondente (seção 6 indica o arquivo).
-   Commitar.
-4. **Conferir a página no ar** — o seletor de ano mostra o ano novo e a
-   tabela carrega.
-
-> Sem os passos 2–3 a página **não enxerga** o ano novo — ela só conhece as
-> URLs que estão no código. Passo a passo com capturas de tela:
-> `COMO-ADICIONAR-UM-ANO.md`, no repositório `tabelas_transparencia`.
-
-**Sem o Apps Script instalado**, criar a aba na mão: nome = ano com 4
-dígitos, A1 em branco (carimbar depois por *Transparência → Carimbar
-agora*), linha 2 = cabeçalhos copiados de outra aba sem alterar nada,
-arrastar para a primeira posição — depois seguir do passo 2 acima.
-
-**Despublicar uma aba** (se precisar tirar do ar): mesma tela → **Conteúdo
-publicado e configurações → Parar de publicar**. A página que aponta pra
-aquela URL passa a mostrar erro de carregamento — remover também a entrada
-de `FONTES_POR_ANO`.
+O que é específico de cada planilha (por qual campo ela divide o ano, ou se
+fica em aba única) está na seção 6, no dicionário de colunas.
 
 ---
 
 ## 5. O carimbo de atualização (Apps Script)
 
-Cada planilha tem um script instalado (`Extensões → Apps Script`) que grava
-o texto `DADOS_ATUALIZADOS_EM: dd/mm/aaaa hh:mm` na célula **A1** — com o
-**mesmo valor** em todas as abas de ano, se a planilha for dividida por ano.
-Fuso `America/Sao_Paulo`. Nunca digitar esse valor à mão.
+A maioria das planilhas tem um script instalado (`Extensões → Apps Script`)
+que grava o texto `DADOS_ATUALIZADOS_EM: dd/mm/aaaa hh:mm` na célula **A1** —
+com o **mesmo valor** em todas as abas de ano, se a planilha for dividida
+por ano. Fuso `America/Sao_Paulo`. Nunca digitar esse valor à mão.
+
+Exceções (alimentadas à mão, sem Apps Script nem carimbo): `painel_orcamentario`,
+`painel_manifestacoes` e `remuneracao_detalhada_servidores` — ver as seções
+de cada uma na seção 6.
 
 O selo verde "dados atualizados em…" nas páginas lê esse valor e significa
 *"a planilha foi conferida/atualizada nesta data"* — não "as linhas deste
@@ -221,9 +192,6 @@ Planilha auxiliar `gabinetes` — 2 colunas: `gabinete` [texto] |
 `legislatura` [texto, `"20"` ou `"21"`]. Alimenta o filtro "Gabinete" da
 página (só mostra os vereadores da legislatura carregada).
 
-Prompt pronto para lançar novos pareceres de diárias (PDF → linhas):
-`prompt-lancar-diarias.txt`, na raiz do repositório `tabelas_transparencia`.
-
 ### empresas_sancionadas — aba única (não divide por ano)
 
 A página só mostra sanções **vigentes** por padrão (compara
@@ -238,7 +206,7 @@ ano quebraria a lógica.
 | `objeto_contrato` | texto | resumido (ex.: `Aquisição de café em grãos`) |
 | `motivo_sancao` | texto | `Inexecução contratual` em todas as linhas até hoje |
 | `data_fim_sancao` | data | vazio = sanção sem prazo (sempre exibida) |
-| `observacao` | texto longo | narrativa da Portaria — fórmula fixa, ver `prompt-lancar-apenados.txt` na raiz do repositório `tabelas_transparencia` |
+| `observacao` | texto longo | narrativa da Portaria, em fórmula fixa — usar as linhas já lançadas como modelo |
 
 ### estagiarios — aba única (não divide por ano)
 
