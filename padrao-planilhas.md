@@ -258,16 +258,25 @@ ano quebraria a lógica.
 | `transito_julgado` | data |
 | `itens_irregulares` | texto, pode ser vazio |
 
-### painel_manifestacoes — dividir por: ano da `data_abertura`
+### painel_manifestacoes — aba única (`Página1`, não dividida por ano)
 
-| Coluna | Tipo |
-|---|---|
-| `tipo_manifestacao` | texto |
-| `assunto` | texto |
-| `canal_entrada` | texto |
-| `data_abertura` | data |
-| `municipio` | texto |
-| `data_conclusao` | data, pode ser vazio |
+⚠️ **Duas exceções ao padrão geral, ambas propositais (decidido em 08/09/2026):**
+> 1. **Não tem carimbo.** Sem Apps Script; os **cabeçalhos ficam na linha 1**
+>    e os dados começam na **linha 2**. Diferente de `painel_orcamentario` e
+>    `remuneracao_detalhada_servidores`, esta página não exibe nenhum selo
+>    de atualização — decisão do usuário, não é necessário.
+> 2. **Não é dividida por ano**, apesar de ter ~1000 linhas acumuladas desde
+>    2019. O dashboard soma/compara vários anos ao mesmo tempo nos cards e
+>    gráficos; dividir obrigaria somar todas as abas a cada carregamento.
+
+| Coluna | Tipo | Observação |
+|---|---|---|
+| `tipo_manifestacao` | texto | |
+| `assunto` | texto | |
+| `canal_entrada` | texto | |
+| `data_abertura` | data | |
+| `municipio` | texto | **coluna existe mas não é usada pelo dashboard** (sem filtro/gráfico/exportação) — decisão deliberada, não wire-up faltando |
+| `data_conclusao` | data, pode ser vazio | vazio = manifestação em aberto |
 
 ### painel_orcamentario — aba única (`Página1`)
 
