@@ -24,21 +24,29 @@ tabelas_transparencia/
 ├── brasao_marilia.png          imagem do brasão, usada pelo README e pelas páginas
 ├── padrao-planilhas.md         formato que cada planilha do Google Sheets precisa ter
 ├── COMO-ADICIONAR-UM-ANO.md    passo a passo para publicar a aba de um ano novo
-├── prompt-lancar-diarias.txt   prompt pronto: PDF de parecer de diárias → linhas da planilha
-├── prompt-lancar-apenados.txt  prompt pronto: PDF de Portaria de penalidade → linha da planilha
 ├── paginas/              páginas completas, hospedadas no GitHub Pages
-│   ├── comum.css              estilo compartilhado por todas as páginas
-│   ├── comum.js               funções compartilhadas (datas, exportação, iframe, etc.)
+│   ├── comum.css                             estilo compartilhado por todas as páginas
+│   ├── comum.js                              funções compartilhadas (datas, exportação, iframe, etc.)
 │   ├── contratos.html
 │   ├── diarias.html
 │   ├── empresas_sancionadas.html
-│   └── julgamentos_contas_camara.html
+│   ├── estagiarios.html
+│   ├── julgamentos_contas_camara.html
+│   ├── painel_manifestacoes.html
+│   ├── painel_orcamentario.html
+│   ├── remuneracao_detalhada_servidores.html
+│   └── servidores.html
 │
 └── incorporacao/         fragmentos de HTML para colar no editor do site oficial
     ├── contratos.html
     ├── diarias.html
     ├── empresas_sancionadas.html
-    └── julgamentos_contas_camara.html
+    ├── estagiarios.html
+    ├── julgamentos_contas_camara.html
+    ├── painel_manifestacoes.html
+    ├── painel_orcamentario.html
+    ├── remuneracao_detalhada_servidores.html
+    └── servidores.html
 ```
 
 ### `paginas/` — o site de verdade
